@@ -5,6 +5,11 @@ from django.shortcuts import render, get_object_or_404
 from .forms import PostForm
 from django.shortcuts import redirect
 
+def welcome_text(request):
+    return render(request, 'srs/welcome.html')
+
+def login(request):
+    return render(request, 'srs/login.html')
 
 def post_list(request):
     posts = Post.objects.filter(published_date__lte=timezone.now()).order_by('published_date')
@@ -26,6 +31,9 @@ def post_new(request):
     else:
         form = PostForm()
     return render(request, 'srs/post_edit.html', {'form': form})
+
+def create_account(request):
+    return render(request, 'srs/create_account.html')
 
 def post_edit(request, pk):
     post = get_object_or_404(Post, pk=pk)
