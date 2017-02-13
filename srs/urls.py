@@ -7,8 +7,8 @@ urlpatterns = [
 	url(r'^post/new/$', views.post_new, name='post_new'),
 	url(r'^post/(?P<pk>\d+)/edit/$', views.post_edit, name='post_edit'),
 	url(r'^create_account/', views.create_account), 
-	url(r'^login/', views.login),    
-    
+	url(r'^login/', views.login),  
+	url(r'^notefile_list', views.notefile_list, name='notefile_list'),
+	url(r'^notefile/(?P<pk>\d+)/$', views.notefile_detail, name='notefile_detail'),
+	url(r'^create_notefile', views.notefile_create, name='create_notefile'),  
 ]
-
-"""url(r'^login/', include('srs.urls')),"""

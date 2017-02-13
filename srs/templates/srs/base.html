@@ -56,7 +56,7 @@
       <ul id="menu">
         <li class="current" ><a href="http://127.0.0.1:8000/">Home</a></li>
         <li><a href="http://127.0.0.1:8000/">About Us</a></li>
-        <li><a href="http://127.0.0.1:8000/app/">Contact Us</a></li>
+        <li><a href="app/">Contact Us</a></li>
       </ul>
     </div><!--close menubar-->  
 
@@ -64,8 +64,8 @@
       <div class="sidebar_container">
         <div class="sidebar">
           <div class="sidebar_item">
-            <h2>GET</h2>
-            <h2>CREATE</h2>
+            <a href="{% url 'notefile_list' %}" ><h2>GET</h2></a>
+            <a href="{% url 'create_notefile' %}" ><h2>CREATE</h2></a>
             <h2>DIRPATH</h2>
             <h2>QUIT</h2>      
           </div><!--close sidebar_item--> 
@@ -74,28 +74,6 @@
      
       <div id="content">
         <div class="content_item">
-           <!-- <h1>Welcome to SQUARENOTE &reg;, The Idea Librarian.</h1>
-            <p>
-            If you are used to other menu-driven programs, you will find SQUARENOTE easy to use.
-            </p>
-
-            <p>
-                It has
-                <ul style='color: white;'>
-                    <li>Simple menus</li>
-                    <li>Consistent prompts</li>
-                    <li>Context-sensitive HELP</li>
-                </ul>
-            </p>   
-          
-            <p>
-                Selecting from the menus:<br>To choose a menu item, do ONE odf the following
-                <ul style='color: white;'>
-                    <li>Use the left and right arrow keys to position the cursor at the command; you want; then use the &lt;Enter&gt; key to select it.</li>
-                    <li>Or simply press the first letter of the command</li>
-                </ul>
-            </p> -->
-
             {% block content %}
             {% endblock %}           
         </div><!--close content_item-->
@@ -139,7 +117,6 @@
             &copy;Copyright 2017. All rights reserved.
         </span>
     </p>
-      <!--<a href="http://validator.w3.org/check?uri=referer">Valid XHTML</a> | <a href="http://fotogrph.com/">Images</a> | <a href="http://www.heartinternet.co.uk/vps/">Virtual Server</a> | website template by <a href="http://www.araynordesign.co.uk">ARaynorDesign</a> -->
   </div><!--close footer-->  
   
 </body>

@@ -1,0 +1,9 @@
+{% extends 'srs/base.html' %}
+
+{% block content %}
+    {% for notefile in notefiles %}
+        <div style="display:inline-block;" >
+			<h1><a href="{% url 'notefile_detail' pk=notefile.pk %}" >{{ notefile.name }}</a></h1>
+        </div>
+    {% endfor %}
+{% endblock %}

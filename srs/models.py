@@ -17,3 +17,32 @@ class Post(models.Model):
 
     def __str__(self):
         return self.title
+
+class Notefile(models.Model):
+    author = models.ForeignKey('auth.User')
+    name = models.CharField(max_length=200)
+    label = models.TextField()
+    created_date = models.DateTimeField(
+            default=timezone.now)
+
+    def create(self):
+        self.created_date = timezone.now()
+        self.save()
+
+    def __str__(self):
+        return self.name
+
+class Notecard(models.Model):
+    author = models.ForeignKey('auth.User')
+    name = models.CharField(max_length=200)
+    label = models.TextField()
+    created_date = models.DateTimeField(
+            default=timezone.now)
+    notefile = models.ForeignKey(Notefile, on_delete=models.CASCADE)
+
+    def create(self):
+        self.created_date = timezone.now()
+        self.save()
+
+    def __str__(self):
+        return self.name

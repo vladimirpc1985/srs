@@ -1,6 +1,8 @@
 from django.shortcuts import render
 from django.utils import timezone
 from .models import Post
+from .models import Notefile
+from .models import Notecard
 from django.shortcuts import render, get_object_or_404
 from .forms import PostForm
 from django.shortcuts import redirect
@@ -48,3 +50,24 @@ def post_edit(request, pk):
     else:
         form = PostForm(instance=post)
     return render(request, 'srs/post_edit.html', {'form': form})
+
+def notefile_list(request):
+    notefiles = Notefile.objects.filter(created_date__lte=timezone.now())
+    return render(request, 'srs/notefile_list.html', {'notefiles': notefiles})
+
+def notefile_detail(request, pk):
+    notefile = get_object_or_404(Notefile, pk=pk)
+    return render(request, 'srs/notefile_detail.html', {'notefile': notefile})
+
+def notefile_create(request):
+    if request.method == "POST":
+        form = PostForm(request.POST)
+        if form.is_valid():
+            notefile = form.save(commit=False)
+            notefile.author = request.user
+            notefile.created_date = timezone.now()
+            notefile.save()
+            return redirect('create_notefile', pk=notefile.pk)
+    else:
+        form = PostForm()
+    return render(request, 'srs/create_notefile.html', {'form': form}) 
