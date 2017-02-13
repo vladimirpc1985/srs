@@ -1,0 +1,23 @@
+{% extends 'srs/base.html' %}
+
+{% block site_content %}
+    <a><h2>Edit</h2></a> 
+    <a><h2>Make</h2></a> 
+    <a><h2>Delete</h2></a> 
+    <a><h2>Select</h2></a>
+    <a><h2>Subject</h2></a>
+    <a><h2>Alpha</h2></a> 
+    <a><h2>Revu</h2></a> 
+    <a><h2>Import</h2></a> 
+    <a><h2>Export</h2></a> 
+    <a><h2>Label</h2></a> 
+    <a href="{% url 'welcome' %}"><h2>Quit</h2></a>
+{% endblock %}
+
+{% block content %}
+    {% for notecard in notecards %}
+        <div>
+			<h3><a href="{% url 'notecard_detail' pk=notecard.pk %}" >{{ notecard.name }}</a></h3>
+        </div>
+    {% endfor %}
+{% endblock %}

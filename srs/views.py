@@ -5,6 +5,7 @@ from .models import Notefile
 from .models import Notecard
 from django.shortcuts import render, get_object_or_404
 from .forms import PostForm
+from .forms import NotefileForm
 from django.shortcuts import redirect
 
 def welcome_text(request):
@@ -59,9 +60,9 @@ def notefile_detail(request, pk):
     notefile = get_object_or_404(Notefile, pk=pk)
     return render(request, 'srs/notefile_detail.html', {'notefile': notefile})
 
-def notefile_create(request):
+def notefile_new(request):
     if request.method == "POST":
-        form = PostForm(request.POST)
+        form = NotefileForm(request.POST)
         if form.is_valid():
             notefile = form.save(commit=False)
             notefile.author = request.user
@@ -69,5 +70,13 @@ def notefile_create(request):
             notefile.save()
             return redirect('create_notefile', pk=notefile.pk)
     else:
-        form = PostForm()
+        form = NotefileForm()
     return render(request, 'srs/create_notefile.html', {'form': form}) 
+
+def notecard_list(request):
+    notecards = Notecard.objects.all()
+    return render(request, 'srs/notecard_list.html', {'notecards': notecards})
+
+def notecard_detail(request, pk):
+    notecard = get_object_or_404(Notecard, pk=pk)
+    return render(request, 'srs/notecard_detail.html', {'notecard': notecard})

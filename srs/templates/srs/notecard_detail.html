@@ -1,12 +1,12 @@
 {% extends 'srs/base.html' %}
 
 {% block site_content %}
-    <a href="{% url 'notecard_list' %}"><h2>Main Menu</h2></a>
+    <a ><h2>Help</h2></a>
     <a href="{% url 'welcome' %}"><h2>Welcome Menu</h2></a> 
 {% endblock %}
 
 {% block content %}
-    <div class="notefile">
-        <p>{{ notefile.label }}</p>
+    <div class="notecard">
+        <p>{{ notecard.label }}</p>
     </div>
 {% endblock %}
