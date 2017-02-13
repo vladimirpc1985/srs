@@ -1,0 +1,14 @@
+{% extends 'srs/base.html' %}
+
+{% block content %}
+	<h2>Create notefile</h2>
+    <p>Enter the name for the notefile you want to create</p>
+    <form method="POST" class="notefile-form">{% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="save btn btn-default">Save</button>
+        <button type="submit" class="cancel btn btn-default">Cancel</button>
+    </form>
+
+    <!-- I have to check if the new name exists and if it does, I have to show a different message asking if the person wants to retrieve the existing message. -->
+
+{% endblock %}
