@@ -8,7 +8,7 @@ from .forms import PostForm
 from django.shortcuts import redirect
 
 def welcome_text(request):
-    return render(request, 'srs/welcome.html')
+    return render(request, 'srs/welcome.html',{})
 
 def login(request):
     return render(request, 'srs/login.html')

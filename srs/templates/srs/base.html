@@ -54,9 +54,9 @@
 
     <div id="menubar">
       <ul id="menu">
-        <li class="current" ><a href="http://127.0.0.1:8000/">Home</a></li>
-        <li><a href="http://127.0.0.1:8000/">About Us</a></li>
-        <li><a href="app/">Contact Us</a></li>
+        <li class="current" ><a href="{% url 'welcome' %}">Home</a></li>
+        <li><a href="{% url 'welcome' %}">About Us</a></li>
+        <li><a hhref="{% url 'welcome' %}">Contact Us</a></li>
       </ul>
     </div><!--close menubar-->  
 
@@ -64,10 +64,8 @@
       <div class="sidebar_container">
         <div class="sidebar">
           <div class="sidebar_item">
-            <a href="{% url 'notefile_list' %}" ><h2>GET</h2></a>
-            <a href="{% url 'create_notefile' %}" ><h2>CREATE</h2></a>
-            <h2>DIRPATH</h2>
-            <h2>QUIT</h2>      
+            {% block site_content %}
+            {% endblock %}      
           </div><!--close sidebar_item--> 
         </div><!--close sidebar-->
        </div><!--close sidebar_container--> 
