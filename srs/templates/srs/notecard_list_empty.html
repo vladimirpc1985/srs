@@ -1,0 +1,14 @@
+{% extends 'srs/base.html' %}
+
+{% block site_content %}
+    <a><h2>Import</h2></a> 
+    <a><h2>Make</h2></a> 
+    <a><h2>Label</h2></a> 
+    <a href="{% url 'welcome' %}"><h2>Quit</h2></a>
+{% endblock %}
+
+{% block content %}
+    <div>
+		<h3>The notefile is empty but you can MAKE or IMPORT some notes.</h3>
+    </div>
+{% endblock %}

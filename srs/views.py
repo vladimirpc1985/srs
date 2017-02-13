@@ -68,14 +68,20 @@ def notefile_new(request):
             notefile.author = request.user
             notefile.created_date = timezone.now()
             notefile.save()
-            return redirect('create_notefile', pk=notefile.pk)
+            return redirect('notecard_list')
     else:
         form = NotefileForm()
     return render(request, 'srs/create_notefile.html', {'form': form}) 
 
 def notecard_list(request):
-    notecards = Notecard.objects.all()
-    return render(request, 'srs/notecard_list.html', {'notecards': notecards})
+    notefile_Name = Notefile.objects.get(name="Notefile1")
+    # notefile_Name = Notefile.objects.none()
+    notecards = Notecard.objects.filter(notefile=notefile_Name)
+    notecards_count = notecards.count()
+    if notecards_count == 0: 
+        return render(request, 'srs/notecard_list_empty.html', {})
+    else:
+        return render(request, 'srs/notecard_list.html', {'notecards': notecards})
 
 def notecard_detail(request, pk):
     notecard = get_object_or_404(Notecard, pk=pk)
