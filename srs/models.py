@@ -25,6 +25,9 @@ class Notefile(models.Model):
     created_date = models.DateTimeField(
             default=timezone.now)
 
+    class Meta:
+        unique_together = ('author', 'name',)
+
     def create(self):
         self.created_date = timezone.now()
         self.save()

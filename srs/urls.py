@@ -9,8 +9,10 @@ urlpatterns = [
 	url(r'^create_account/', views.create_account, name="create_account"), 
 	url(r'^login/', views.login),  
 	url(r'^notefile_list', views.notefile_list, name='notefile_list'),
-	url(r'^notefile/(?P<pk>\d+)/$', views.notefile_detail, name='notefile_detail'),
-	url(r'^notecard_list', views.notecard_list, name='notecard_list'),  
+	url(r'^notefile/(?P<name>[-\w]+)/$', views.notefile_detail, name='notefile_detail'),
+	url(r'^notecard_list/(?P<name>[-\w]+)/$', views.notecard_list, name='notecard_list'),  
 	url(r'^notecard/(?P<pk>\d+)/$', views.notecard_detail, name='notecard_detail'),
-	url(r'^create_notefile', views.notefile_new, name='create_notefile'),    
+	url(r'^create_notefile', views.notefile_new, name='create_notefile'),
+	url(r'^contact/$', views.contact, name='contact'),
+	url(r'^about/$', views.about, name='about'),   
 ]

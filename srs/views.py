@@ -56,8 +56,8 @@ def notefile_list(request):
     notefiles = Notefile.objects.filter(created_date__lte=timezone.now())
     return render(request, 'srs/notefile_list.html', {'notefiles': notefiles})
 
-def notefile_detail(request, pk):
-    notefile = get_object_or_404(Notefile, pk=pk)
+def notefile_detail(request, name):
+    notefile = get_object_or_404(Notefile, name=name)
     return render(request, 'srs/notefile_detail.html', {'notefile': notefile})
 
 def notefile_new(request):
@@ -68,15 +68,20 @@ def notefile_new(request):
             notefile.author = request.user
             notefile.created_date = timezone.now()
             notefile.save()
-            return redirect('notecard_list')
+            return redirect('notefile_list')
     else:
         form = NotefileForm()
     return render(request, 'srs/create_notefile.html', {'form': form}) 
 
-def notecard_list(request):
-    notefile_Name = Notefile.objects.get(name="Notefile1")
+def get_notefile(request):
+    return request.GET.get('name')
+
+def notecard_list(request, name):
+    notefile_Name = Notefile.objects.get(name=name)
     # notefile_Name = Notefile.objects.none()
-    notecards = Notecard.objects.filter(notefile=notefile_Name)
+    #print(name)
+    #print("\n")
+    notecards = Notecard.objects.filter(notefile= notefile_Name )
     notecards_count = notecards.count()
     if notecards_count == 0: 
         return render(request, 'srs/notecard_list_empty.html', {})
@@ -86,3 +91,9 @@ def notecard_list(request):
 def notecard_detail(request, pk):
     notecard = get_object_or_404(Notecard, pk=pk)
     return render(request, 'srs/notecard_detail.html', {'notecard': notecard})
+
+def about(request):
+    return render(request, 'srs/about.html')
+
+def contact(request):
+    return render(request, 'srs/contact.html')
