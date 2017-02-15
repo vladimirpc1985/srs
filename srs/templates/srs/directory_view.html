@@ -1,0 +1,22 @@
+{% extends 'srs/base.html' %}
+
+{% block site_content %}
+    <a href="{% url 'create_directory' %}" ><h2>Create Directory</h2></a>
+    <a href="{% url 'create_notefile' %}" ><h2>Create Notefile</h2></a>
+    <p>[INSERT SIDE CONTENT HERE]</p>
+{% endblock %}
+
+{% block content %}
+	<div style='background-color: white; margin-bottom: 2em;'>Home Directory</div>
+	{% for directory in directories %}
+        <div style="display:inline-block;" >
+			<h3><a href="" >{{ directory.name }}</a></h3>
+        </div>
+    {% endfor %}
+    <br>
+    {% for notefile in notefiles %}
+        <div style="display:inline-block;" >
+			<h3><a href="{% url 'notefile_detail' name=notefile.name %}" >{{ notefile.name }}</a></h3>
+        </div>
+    {% endfor %}
+{% endblock %}
