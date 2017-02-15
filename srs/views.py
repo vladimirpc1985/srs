@@ -9,6 +9,12 @@ from .forms import PostForm
 from .forms import NotefileForm
 from .forms import DirectoryForm
 from django.shortcuts import redirect
+from django.contrib.auth import logout
+
+def logout_view(request):
+    logout(request)
+    return redirect('welcome')
+
 
 def welcome_text(request):
     return render(request, 'srs/welcome.html',{})

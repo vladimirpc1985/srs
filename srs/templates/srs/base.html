@@ -55,11 +55,21 @@
     <div id="menubar">
       <ul id="menu">
         <li {% if request.path == "/" %} class="current" {% endif %} ><a href="{% url 'welcome' %}">Home</a></li>
+        {% if user.is_authenticated %}
         <li {% if "/srs/" in request.path %} class="current" {% endif %} ><a href="{% url 'home_directory' %}">SRS</a></li>
+        {% endif %}
         <li {% if request.path == "/about/" %} class="current" {% endif %}><a href="{% url 'about' %}">About Us</a></li>
         <li {% if request.path == "/contact/" %} class="current" {% endif %}><a href="{% url 'contact' %}">Contact Us</a></li>
+        <!-- PULL RIGHT WITHOUT BREAK; -->
+        {% if user.is_authenticated %}
+        <li><a href="{% url 'logout' %}">Logout</a></li>
+        {% else %}
+        <li><a href="{% url 'admin:index' %}">Login</a></li>
+
+        {% endif %}
       </ul>
-    </div><!--close menubar-->  
+    </div><!--close menubar--> 
+    <div style="clear: both;"></div> 
 
     <div id="site_content">     
       <div class="sidebar_container">
