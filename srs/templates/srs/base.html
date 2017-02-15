@@ -44,7 +44,7 @@
     <div id="header">
       <div id="banner">
         <div id="welcome">
-          <h1>Scientific System Reference</h1>
+          <h1>Scientific Reference System</h1>
         </div><!--close welcome-->
         <div id="welcome_slogan">
           <h1>The Idea Librarian</h1>
@@ -55,6 +55,7 @@
     <div id="menubar">
       <ul id="menu">
         <li {% if request.path == "/" %} class="current" {% endif %} ><a href="{% url 'welcome' %}">Home</a></li>
+        <li {% if "/srs/" in request.path %} class="current" {% endif %} ><a href="{% url 'home_directory' %}">SRS</a></li>
         <li {% if request.path == "/about/" %} class="current" {% endif %}><a href="{% url 'about' %}">About Us</a></li>
         <li {% if request.path == "/contact/" %} class="current" {% endif %}><a href="{% url 'contact' %}">Contact Us</a></li>
       </ul>

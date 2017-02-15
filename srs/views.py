@@ -1,15 +1,36 @@
 from django.shortcuts import render
 from django.utils import timezone
 from .models import Post
+from .models import Directory
 from .models import Notefile
 from .models import Notecard
 from django.shortcuts import render, get_object_or_404
 from .forms import PostForm
 from .forms import NotefileForm
+from .forms import DirectoryForm
 from django.shortcuts import redirect
 
 def welcome_text(request):
     return render(request, 'srs/welcome.html',{})
+
+def home_directory(request):
+    notefiles = Notefile.objects.filter(author=request.user).filter(directory__isnull=True)
+    directories = Directory.objects.filter(author=request.user).filter(parent_directory=2)
+    #Edit sos dynamic
+    return render(request, 'srs/directory_view.html', {'notefiles': notefiles, 'directories': directories})
+
+def create_directory(request):
+    if request.method == "POST":
+        form = DirectoryForm(request.POST)
+        if form.is_valid():
+            directory = form.save(commit=False)
+            directory.author = request.user
+            directory.created_date = timezone.now()
+            directory.save()
+            return redirect('home_directory')
+    else:
+        form = DirectoryForm()
+    return render(request, 'srs/create_directory.html', {'form': form})
 
 def login(request):
     return render(request, 'srs/login.html')
@@ -78,9 +99,6 @@ def get_notefile(request):
 
 def notecard_list(request, name):
     notefile_Name = Notefile.objects.get(name=name)
-    # notefile_Name = Notefile.objects.none()
-    #print(name)
-    #print("\n")
     notecards = Notecard.objects.filter(notefile= notefile_Name )
     notecards_count = notecards.count()
     if notecards_count == 0: 
