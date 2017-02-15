@@ -1,4 +1,5 @@
 from django.conf.urls import url
+from django.contrib import admin
 from . import views
 
 urlpatterns = [
@@ -16,5 +17,7 @@ urlpatterns = [
 	url(r'^contact/$', views.contact, name='contact'),
 	url(r'^about/$', views.about, name='about'), 
 	url(r'^srs/$', views.home_directory, name='home_directory'),
-	url(r'^srs/create_directory/$', views.create_directory, name='create_directory'),  
+	url(r'^srs/create_directory/$', views.create_directory, name='create_directory'),
+	url(r'^admin/', admin.site.urls, name='login_redirect'),
+	url(r"^logout/$", views.logout_view,name="logout"),  
 ]
