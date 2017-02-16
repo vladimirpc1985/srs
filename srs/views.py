@@ -1,15 +1,8 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
-from .models import Post
-from .models import Directory
-from .models import Notefile
-from .models import Notecard
-from django.shortcuts import render, get_object_or_404
-from .forms import PostForm
-from .forms import NotefileForm
-from .forms import DirectoryForm
-from django.shortcuts import redirect
 from django.contrib.auth import logout
+from .models import Directory, Notefile, Notecard
+from .forms import NotefileForm, DirectoryForm
 
 def logout_view(request):
     logout(request)
@@ -40,27 +33,6 @@ def create_directory(request):
 
 def login(request):
     return render(request, 'srs/login.html')
-
-def post_list(request):
-    posts = Post.objects.filter(published_date__lte=timezone.now()).order_by('published_date')
-    return render(request, 'srs/post_list.html', {'posts': posts})
-
-def post_detail(request, pk):
-    post = get_object_or_404(Post, pk=pk)
-    return render(request, 'srs/post_detail.html', {'post': post})
-
-def post_new(request):
-    if request.method == "POST":
-        form = PostForm(request.POST)
-        if form.is_valid():
-            post = form.save(commit=False)
-            post.author = request.user
-            post.published_date = timezone.now()
-            post.save()
-            return redirect('post_detail', pk=post.pk)
-    else:
-        form = PostForm()
-    return render(request, 'srs/post_edit.html', {'form': form})
 
 def create_account(request):
     return render(request, 'srs/create_account.html')

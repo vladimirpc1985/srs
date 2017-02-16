@@ -1,13 +1,5 @@
 from django import forms
-from .models import Post
-from .models import Notefile
-from .models import Directory
-
-class PostForm(forms.ModelForm):
-
-    class Meta:
-        model = Post
-        fields = ('title', 'text',)
+from .models import Notefile, Directory
 
 class NotefileForm(forms.ModelForm):
 
