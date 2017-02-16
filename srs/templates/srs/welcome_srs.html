@@ -1,9 +1,16 @@
-{% extends 'srs/base.html' %}
+{% extends 'srs/base_srs.html' %}
+
+{% block site_content %}
+    <a href="{% url 'notefile_list' %}" ><h2>Get</h2></a>
+    <a href="{% url 'create_notefile' %}" ><h2>Create</h2></a>
+    <a href="{% url 'home_directory' %}" ><h2>Dirpath</h2></a>
+    <h2>Quit</h2>  
+{% endblock %}
 
 {% block content %}
-    <h1>Welcome to the online Scientific Reference System &reg;, The Idea Librarian.</h1>
+    <h1>Welcome to SQUARENOTE &reg;, The Idea Librarian.</h1>
     <p>
-        If you are used to other menu-driven programs, you will find SRS easy to use.
+        If you are used to other menu-driven programs, you will find SQUARENOTE easy to use.
         </p>
 
         <p>

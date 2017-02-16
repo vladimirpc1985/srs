@@ -23,9 +23,6 @@ class Notefile(models.Model):
             default=timezone.now)
     directory = models.ForeignKey(Directory, null=True, on_delete=models.CASCADE)
 
-    class Meta:
-        unique_together = ('author', 'name',)
-
     def create(self):
         self.created_date = timezone.now()
         self.save()

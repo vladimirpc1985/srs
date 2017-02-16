@@ -1,29 +1,4 @@
 {% load staticfiles %}
-<!--<html>
-    <head>
-        <title>SRS</title>
-        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
-        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
-        <link href='//fonts.googleapis.com/css?family=Lobster&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
-        <link rel="stylesheet" href="{% static 'css/srs.css' %}">
-    </head>
-    <body>
-        <div class="page-header">
-            {% if user.is_authenticated %}
-                <a href="" class="top-menu"><span class="glyphicon glyphicon-plus"></span></a>
-            {% endif %}
-            <h1><a href="/">Scientific Reference System</a></h1>
-        </div>
-        <div class="content container">
-            <div class="row">
-                <div class="col-md-8">
-                { block content }
-                { endblock }
-                </div>
-            </div>
-        </div>
-    </body>
-</html> -->
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
@@ -57,7 +32,7 @@
         <li {% if request.path == "/" %} class="current" {% endif %} ><a href="{% url 'welcome' %}">Home</a></li>
         {% if user.is_authenticated %}
         <li {% if "/srs/" in request.path %} class="current" {% endif %} ><a href="{% url 'home_directory' %}">SRS</a></li>
-        {% endif %}
+        {% endif %} 
         <li {% if request.path == "/about/" %} class="current" {% endif %}><a href="{% url 'about' %}">About Us</a></li>
         <li {% if request.path == "/contact/" %} class="current" {% endif %}><a href="{% url 'contact' %}">Contact Us</a></li>
         <!-- PULL RIGHT WITHOUT BREAK; -->
@@ -71,15 +46,10 @@
     </div><!--close menubar--> 
     <div style="clear: both;"></div> 
 
-    <div id="site_content">     
-      <div class="sidebar_container">
-        <div class="sidebar">
-          <div class="sidebar_item">
-            {% block site_content %}
-            {% endblock %}      
-          </div><!--close sidebar_item--> 
-        </div><!--close sidebar-->
-       </div><!--close sidebar_container--> 
+    <div id="site_content"> 
+
+      {% block sidebar_content %}
+      {% endblock %}  
      
       <div id="content">
         <div class="content_item">
@@ -88,34 +58,6 @@
         </div><!--close content_item-->
       </div><!--close content-->  
     </div><!--close site_content--> 
-
-    {% if FALSE %}
-    <div id="content_bottom">
-      <div class="content_bottom_container_box">
-        <h4>Latest Blog Post</h4>
-        <p> Phasellus laoreet feugiat risus. Ut tincidunt, ante vel fermentum iaculis.</p>
-        <div class="readmore">
-          <a href="#">Read more</a>
-        </div><!--close readmore-->
-      </div><!--close content_bottom_container_box-->
-      <div class="content_bottom_container_box">
-       <h4>Latest News</h4>
-        <p> Phasellus laoreet feugiat risus. Ut tincidunt, ante vel fermentum iaculis.</p>
-        <div class="readmore">
-          <a href="#">Read more</a>
-        </div><!--close readmore-->
-      </div><!--close content_bottom_container_box-->
-      <div class="content_bottom_container_boxl">
-        <h4>Latest Projects</h4>
-        <p> Phasellus laoreet feugiat risus. Ut tincidunt, ante vel fermentum iaculis.</p>
-        <div class="readmore">
-          <a href="#">Read more</a>
-        </div><!--close readmore-->   
-      </div><!--close content_bottom_container_box1-->      
-      <br style="clear:both"/>
-    </div><!--close content_bottom-->   
-  </div><!--close main-->
-  {% endif %}
   
   <div id="footer">
     <p style='text-align: center;'>

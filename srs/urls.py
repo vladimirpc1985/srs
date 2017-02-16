@@ -14,6 +14,7 @@ urlpatterns = [
 	url(r'^contact/$', views.contact, name='contact'),
 	url(r'^about/$', views.about, name='about'), 
 	url(r'^srs/$', views.home_directory, name='home_directory'),
+	#url(r'^welcome_srs/$', views.welcome_srs, name='welcome_srs'),
 	url(r'^srs/create_directory/$', views.create_directory, name='create_directory'),
 	url(r'^srs/(?P<name>[-\w]+)/$', views.directory_content, name='directory_content'),
 	url(r'^admin/', admin.site.urls, name='login_redirect'),

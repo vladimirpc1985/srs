@@ -1,0 +1,12 @@
+{% extends 'srs/base.html' %}
+
+{% block sidebar_content %}
+    <div class="sidebar_container">
+        <div class="sidebar">
+          <div class="sidebar_item">
+            {% block site_content %}
+            {% endblock %}      
+          </div><!--close sidebar_item--> 
+        </div><!--close sidebar-->
+       </div><!--close sidebar_container--> 
+{% endblock %}

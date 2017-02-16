@@ -12,6 +12,9 @@ def logout_view(request):
 def welcome_text(request):
     return render(request, 'srs/welcome.html',{})
 
+def welcome_srs(request):
+    return render(request, 'srs/welcome_srs.html',{})
+
 def home_directory(request):
     notefiles = Notefile.objects.filter(author=request.user).filter(directory__isnull=True)
     directories = Directory.objects.filter(author=request.user).filter(parent_directory=2)
