@@ -152,6 +152,10 @@ ul#menu li a
   text-shadow: 0px -1px 0px #000;
   padding: 16px 20px 10px 20px;
   background: transparent; } 
+
+ul#menu li a#last_nav
+{ float: right;
+   margin-right: 20px; } 
   
 ul#menu li.current a
 { color: #FFF;

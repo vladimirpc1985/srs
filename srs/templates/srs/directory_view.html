@@ -7,16 +7,21 @@
 {% endblock %}
 
 {% block content %}
+{{request.path }}
 	<div style='background-color: white; margin-bottom: 2em;'>Home Directory</div>
 	{% for directory in directories %}
         <div style="display:inline-block;" >
-			<h3><a href="" >{{ directory.name }}</a></h3>
+			<h3><a href="{% url 'directory_content' name=directory.name %}" >{{ directory.name }}</a></h3>
         </div>
     {% endfor %}
     <br>
     {% for notefile in notefiles %}
         <div style="display:inline-block;" >
-			<h3><a href="{% url 'notefile_detail' name=notefile.name %}" >{{ notefile.name }}</a></h3>
+            {% if request.path == '/srs/' %}
+			<h3><a href="" >{{ notefile.name }}</a></h3>
+            {% else %}
+            <h3><a href="{% url 'notefile' directory=notefile.directory notefile=notefile.name %}" >{{ notefile.name }}</a></h3>
+            {% endif %}
         </div>
     {% endfor %}
 {% endblock %}

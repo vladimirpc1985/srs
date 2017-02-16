@@ -62,9 +62,9 @@
         <li {% if request.path == "/contact/" %} class="current" {% endif %}><a href="{% url 'contact' %}">Contact Us</a></li>
         <!-- PULL RIGHT WITHOUT BREAK; -->
         {% if user.is_authenticated %}
-        <li><a href="{% url 'logout' %}">Logout</a></li>
+        <li><a id="last_nav" href="{% url 'logout' %}">Logout</a></li>
         {% else %}
-        <li><a href="{% url 'admin:index' %}">Login</a></li>
+        <li><a id="last_nav" href="{% url 'admin:index' %}">Login</a></li>
 
         {% endif %}
       </ul>
