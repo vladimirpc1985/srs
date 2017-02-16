@@ -18,6 +18,12 @@ def home_directory(request):
     #Edit sos dynamic
     return render(request, 'srs/directory_view.html', {'notefiles': notefiles, 'directories': directories})
 
+def directory_content(request, name):
+    current_directory = Directory.objects.get(name=name)
+    notefiles = Notefile.objects.filter(author=request.user).filter(directory=current_directory.id)
+    directories = Directory.objects.filter(author=request.user).filter(parent_directory=current_directory.id)
+    return render(request, 'srs/directory_view.html', {'notefiles': notefiles, 'directories': directories})
+
 def create_directory(request):
     if request.method == "POST":
         form = DirectoryForm(request.POST)
@@ -57,6 +63,11 @@ def notefile_list(request):
 
 def notefile_detail(request, name):
     notefile = get_object_or_404(Notefile, name=name)
+    return render(request, 'srs/notefile_detail.html', {'notefile': notefile})
+
+def notefile_details(request, directory, notefile):
+    current_directory = Directory.objects.get(name=directory)
+    notefile = get_object_or_404(Notefile, name=notefile, directory=current_directory.id)
     return render(request, 'srs/notefile_detail.html', {'notefile': notefile})
 
 def notefile_new(request):

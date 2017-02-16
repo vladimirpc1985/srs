@@ -15,6 +15,9 @@ urlpatterns = [
 	url(r'^about/$', views.about, name='about'), 
 	url(r'^srs/$', views.home_directory, name='home_directory'),
 	url(r'^srs/create_directory/$', views.create_directory, name='create_directory'),
+	url(r'^srs/(?P<name>[-\w]+)/$', views.directory_content, name='directory_content'),
 	url(r'^admin/', admin.site.urls, name='login_redirect'),
-	url(r"^logout/$", views.logout_view,name="logout"),  
+	url(r"^logout/$", views.logout_view,name="logout"),
+	url(r'^srs/(?P<directory>[-\w]+)/(?P<notefile>[-\w]+)/$', views.notefile_details, name='notefile'),
+	url(r'^srs/(?P<name>[-\w]+)/$', views.notefile_detail, name='notefile_detai'), 
 ]
