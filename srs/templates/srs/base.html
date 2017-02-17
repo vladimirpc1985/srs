@@ -52,7 +52,6 @@
         {% endif %} 
         <li {% if request.path == "/about/" %} class="current" {% endif %}><a href="{% url 'about' %}">About Us</a></li>
         <li {% if request.path == "/contact/" %} class="current" {% endif %}><a href="{% url 'contact' %}">Contact Us</a></li>
-        <!-- PULL RIGHT WITHOUT BREAK; -->
         {% if user.is_authenticated %}
         <li><a id="last_nav" href="{% url 'logout' %}">Logout</a></li>
         {% else %}
