@@ -42,7 +42,7 @@ function gallery() {
   var current = ($('ul.slideshow li.show')?  $('ul.slideshow li.show') : $('#ul.slideshow li:first'));
 
   // trying to avoid speed issue
-  if(current.queue('fx').length == 0) {
+  if( false ) { //current.queue('fx').length == 0
 
     // get the next image, if it reached the end of the slideshow, rotate it back to the first image
     var next = ((current.next().length) ? ((current.next().attr('id') == 'slideshow-caption')? $('ul.slideshow li:first') :current.next()) : $('ul.slideshow li:first'));
