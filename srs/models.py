@@ -1,5 +1,18 @@
 from django.db import models
 from django.utils import timezone
+from django.db.models.signals import post_save
+from django.contrib.auth.models import User
+
+def create_folder(sender, instance, created, **kwargs):
+    if not created:  # if it's not a new object return
+        return
+
+    home_directory = Directory()
+    home_directory.author = instance
+    home_directory.name = 'Home'
+    home_directory.save()
+
+post_save.connect(create_folder, sender=User)
 
 class Directory(models.Model):
     author = models.ForeignKey('auth.User')
