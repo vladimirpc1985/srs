@@ -1,4 +1,5 @@
 {% extends 'srs/base_srs.html' %}
+{% load staticfiles %}
 
 {% block site_content %}
     <a href="{% url 'create_directory' %}" ><h2>Create Directory</h2></a>
@@ -9,9 +10,10 @@
 {% block content %}
 {{request.path }}
 	<div style='background-color: white; margin-bottom: 2em;'>Home Directory</div>
+    <style> .directory_icon:hover{ content: url("{% static 'images/folder_open.png' %}");} </style>
 	{% for directory in directories %}
         <div style="display:inline-block;" >
-			<h3><a href="{% url 'directory_content' name=directory.name %}" >{{ directory.name }}</a></h3>
+			<h3><a href="{% url 'directory_content' name=directory.name %}" ><img class="directory_icon" src="{% static 'images/folder_close.png' %}"></img><br>{{ directory.name }}</a></h3>
         </div>
     {% endfor %}
     <br>
