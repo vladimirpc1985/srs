@@ -1,4 +1,5 @@
 {% extends 'srs/base_srs.html' %}
+{% load staticfiles %}
 
 {% block site_content %}
     <a href="{% url 'create_directory' %}" ><h2>Create Directory</h2></a>
@@ -9,18 +10,19 @@
 {% block content %}
 {{request.path }}
 	<div style='background-color: white; margin-bottom: 2em;'>Home Directory</div>
+    <style> .directory_icon:hover{ content: url("{% static 'images/folder_open.png' %}");} </style>
 	{% for directory in directories %}
         <div style="display:inline-block;" >
-			<h3><a href="{% url 'directory_content' name=directory.name %}" >{{ directory.name }}</a></h3>
+			<h3><a class="directory_link" href="{% url 'directory_content' name=directory.name %}" ><img class="directory_icon" src="{% static 'images/folder_close.png' %}"></img><br>{{ directory.name }}</a></h3>
         </div>
     {% endfor %}
     <br>
     {% for notefile in notefiles %}
         <div style="display:inline-block;" >
             {% if request.path == '/srs/' %}
-			<h3><a href="" >{{ notefile.name }}</a></h3>
+			<h3><a class="notefile_link" href="" >{{ notefile.name }}</a></h3>
             {% else %}
-            <h3><a href="{% url 'notefile' directory=notefile.directory notefile=notefile.name %}" >{{ notefile.name }}</a></h3>
+            <h3><a class="notefile_link" href="{% url 'notefile' directory=notefile.directory notefile=notefile.name %}" >{{ notefile.name }}</a></h3>
             {% endif %}
         </div>
     {% endfor %}

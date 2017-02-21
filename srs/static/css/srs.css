@@ -419,4 +419,12 @@ ul img {
   padding: 0;
   font: normal 130% arial, sans-serif;
   color: #FFF;}
+
+.directory_link a {
+  text-decoration: none;
+}
+
+.notefile_link a {
+  text-decoration: none;
+}
  
