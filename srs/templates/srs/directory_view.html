@@ -4,16 +4,15 @@
 {% block site_content %}
     <a href="{% url 'create_directory' %}" ><h2>Create Directory</h2></a>
     <a href="{% url 'create_notefile' %}" ><h2>Create Notefile</h2></a>
-    <p>[INSERT SIDE CONTENT HERE]</p>
 {% endblock %}
 
 {% block content %}
-{{request.path }}
-	<div style='background-color: white; margin-bottom: 2em;'>Home Directory</div>
+
+	<div style='background-color: white; margin-bottom: 2em;'>{{ directories.0.parent_directory }}</div>
     <style> .directory_icon:hover{ content: url("{% static 'images/folder_open.png' %}");} </style>
 	{% for directory in directories %}
         <div style="display:inline-block;" >
-			<h3><a class="directory_link" href="{% url 'directory_content' name=directory.name %}" ><img class="directory_icon" src="{% static 'images/folder_close.png' %}"></img><br>{{ directory.name }}</a></h3>
+			<h3><a class="directory_link" href="{% url 'directory_content' name=directory.name %}" ><img class="directory_icon" src="{% static 'images/folder_close.png' %}">{{ directory.name }}</img></a></h3>
         </div>
     {% endfor %}
     <br>
