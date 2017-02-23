@@ -31,7 +31,9 @@ class Directory(models.Model):
 class Notefile(models.Model):
     author = models.ForeignKey('auth.User')
     name = models.CharField(max_length=200)
-    label = models.TextField()
+    keywords = models.TextField(null=True)
+    label = models.TextField(null=True)
+    body = models.TextField(null=True)
     created_date = models.DateTimeField(
             default=timezone.now)
     directory = models.ForeignKey(Directory, null=True, on_delete=models.CASCADE)
@@ -46,7 +48,9 @@ class Notefile(models.Model):
 class Notecard(models.Model):
     author = models.ForeignKey('auth.User')
     name = models.CharField(max_length=200)
-    label = models.TextField()
+    keywords = models.TextField(null=True)
+    label = models.TextField(null=True)
+    body = models.TextField(null=True)
     created_date = models.DateTimeField(
             default=timezone.now)
     notefile = models.ForeignKey(Notefile, on_delete=models.CASCADE)
