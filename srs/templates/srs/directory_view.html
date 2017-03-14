@@ -18,8 +18,13 @@
     <br>
     {% for notefile in notefiles %}
         <div style="display:inline-block;" >
+<!--             {% if notefile.directory == 'None' %}
+                notefile.directory = 'Home'
+            {% endif %}
+            <h3><a class="notefile_link" href="{% url 'notefile' directory=notefile.directory notefile=notefile.name %}" >{{ notefile.name }}</a></h3>
+ -->
             {% if request.path == '/srs/' %}
-			<h3><a class="notefile_link" href="" >{{ notefile.name }}</a></h3>
+ 			<h3><a class="notefile_link" href="" >{{ notefile.name }}</a></h3>            
             {% else %}
             <h3><a class="notefile_link" href="{% url 'notefile' directory=notefile.directory notefile=notefile.name %}" >{{ notefile.name }}</a></h3>
             {% endif %}

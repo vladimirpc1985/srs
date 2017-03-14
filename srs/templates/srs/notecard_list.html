@@ -1,4 +1,5 @@
 {% extends 'srs/base_srs.html' %}
+{% load app_filters %}
 
 {% block site_content %}
     <a><h2>Edit</h2></a> 
@@ -15,9 +16,23 @@
 {% endblock %}
 
 {% block content %}
-    {% for notecard in notecards %}
-        <div>
-			<h3><a href="{% url 'notecard_detail' pk=notecard.pk %}" >{{ notecard.name }}</a></h3>
-        </div>
+
+ <div class="container" style="position:relative;background-color:white;">
+    {% for i in "12345" %}
+        {% if forloop.counter == 5 %}
+            <div class="imageDiv">
+                {% if forloop.counter <= notecards.count %}
+                    <h3><a href="{% url 'notecard_detail' pk=notecards|lookup_pk:i %}" >{{ notecards|lookup:i }} </a></h3>
+                {% endif %}
+            </div>
+        {% elif forloop.counter <= notecards.count %}
+            <div class="imageDiv bottomDiv{{i}}">
+                <h3><a href="{% url 'notecard_detail' pk=notecards|lookup_pk:i %}" >{{ notecards|lookup:i }} </a></h3>
+            </div>
+        {% else %}
+            <div class="imageDiv bottomDiv{{i}}"></div>
+        {% endif %}
     {% endfor %}
+ </div>
+
 {% endblock %}

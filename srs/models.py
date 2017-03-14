@@ -40,10 +40,15 @@ class Notefile(models.Model):
 
     def create(self):
         self.created_date = timezone.now()
+        #Define default directory to Home
+        if self.directory is None:
+            self.directory = Directory.objects.filter(name='Home').values('id')
         self.save()
 
     def __str__(self):
         return self.name
+
+        return 
 
 class Notecard(models.Model):
     author = models.ForeignKey('auth.User')
