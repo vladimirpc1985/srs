@@ -436,7 +436,7 @@ ul img {
             margin-left: 100px;
             background: #fff;
             display: block;
-            height: 80px;
+            height: 77px;
             padding: 10px;
             border-radius: 2px 2px 2px 2px;
             -webkit-box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3), 0 0 40px rgba(0, 0, 0, 0.1) inset;
@@ -444,6 +444,8 @@ ul img {
             box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3), 0 0 40px rgba(0, 0, 0, 0.1) inset;
             width: 455px;
             background-color:#2276D4;
+            border-style: solid;
+            border-color: white;
         }
 
 .bottomDiv4{
