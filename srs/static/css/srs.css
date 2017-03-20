@@ -446,6 +446,7 @@ ul img {
             background-color:#2276D4;
             border-style: solid;
             border-color: white;
+            text-decoration: none;
         }
 
 #bottomDiv4{
@@ -490,6 +491,10 @@ ul img {
     outline-style: auto;
     outline-width: 5px;
     outline-color: -webkit-focus-ring-color;
+}
+
+.imageDiv a{
+    text-decoration: none;
 }
 
 
