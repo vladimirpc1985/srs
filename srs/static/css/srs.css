@@ -446,6 +446,8 @@ ul img {
             background-color:#2276D4;
             border-style: solid;
             border-color: white;
+            border-right: none;
+            border-bottom:none;
             text-decoration: none;
         }
 
@@ -474,6 +476,17 @@ ul img {
    width: 645px;
    /*right:600px;*/
 }
+
+.imageDiv:after{
+  content : "";
+  position: absolute;
+  right    : 0;
+  top  : 0;
+  height  : 25px;
+  width   : 100%;  /* or 100px */
+  border-right: 2px solid white;
+}
+
 .imageDiv:focus{
   outline: none;
 }
