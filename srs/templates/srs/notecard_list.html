@@ -1,5 +1,5 @@
 {% extends 'srs/base_srs.html' %}
-{% load app_filters %}
+{% load app_filters static %}
 
 {% block site_content %}
     <a><h2>Edit</h2></a> 
@@ -20,19 +20,22 @@
  <div class="container" style="position:relative;">
     {% for i in "12345" %}
         {% if forloop.counter == 5 %}
-            <div class="imageDiv">
+            <div class="imageDiv" tabindex="1">
                 {% if forloop.counter <= notecards.count %}
                     <h3><a href="{% url 'notecard_detail' pk=notecards|lookup_pk:i %}" >{{ notecards|lookup:i }} </a></h3>
                 {% endif %}
             </div>
         {% elif forloop.counter <= notecards.count %}
-            <div class="imageDiv bottomDiv{{i}}">
+            <div class="imageDiv" id="bottomDiv{{i}}" tabindex="1" >
                 <h3><a href="{% url 'notecard_detail' pk=notecards|lookup_pk:i %}" >{{ notecards|lookup:i }} </a></h3>
             </div>
         {% else %}
-            <div class="imageDiv bottomDiv{{i}}"></div>
+            <div class="imageDiv" id="bottomDiv{{i}}" tabindex="1"></div>
+
         {% endif %}
     {% endfor %}
  </div>
+
+<script type="text/javascript" src="{% static 'js/notecard_navigate.js' %}"></script>
 
 {% endblock %}

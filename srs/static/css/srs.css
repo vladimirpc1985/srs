@@ -448,28 +448,48 @@ ul img {
             border-color: white;
         }
 
-.bottomDiv4{
+#bottomDiv4{
    /*position:relative;*/
    top:100px;
    /*right:150px;*/
    width: 495px;
 }
-.bottomDiv3{
+#bottomDiv3{
    /*position:relative;*/
    top:200px;
    width: 545px;
    /*right:300px;*/
 }
 
-.bottomDiv2{
+#bottomDiv2{
    /*position:relative;*/
    top:300px;
    width: 595px;
    /*right:450px;*/
 }
-.bottomDiv1{
+#bottomDiv1{
    /*position:relative;*/
    top:400px;
    width: 645px;
    /*right:600px;*/
 }
+.imageDiv:focus{
+  outline: none;
+}
+
+.imageDiv:focus::before{
+    content: "";
+    background-color: black; 
+    width: 25px; 
+    display: block; 
+    height: 60px;
+    float: left;
+    margin-left: -50px;
+    margin-top: 10px;
+    position: relative;
+    outline-style: auto;
+    outline-width: 5px;
+    outline-color: -webkit-focus-ring-color;
+}
+
+
