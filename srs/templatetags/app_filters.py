@@ -14,3 +14,9 @@ def lookup_pk(d, key):
     a = int(key)
     a = a-1
     return d[a].pk
+
+@register.filter(name='lookup_label')
+def lookup_label(d, key):
+    a = int(key)
+    a = a-1
+    return d[a].label
