@@ -9,10 +9,14 @@
 {% block content %}
 
 	<div style='background-color: white; margin-bottom: 2em;'>{{ directories.0.parent_directory }}</div>
-    <style> .directory_icon:hover{ content: url("{% static 'images/folder_open.png' %}");} </style>
+    <style> .directory_icon:hover{ content: url("{% static 'images/folder_open.png' %}");} .directory_link{ text-decoration: none;} .directory_link span{ z-index: 100; position: relative; top: -40px; left: -110px;}</style>
 	{% for directory in directories %}
         <div style="display:inline-block;" >
-			<h3><a class="directory_link" href="{% url 'directory_content' name=directory.name %}" ><img class="directory_icon" src="{% static 'images/folder_close.png' %}">{{ directory.name }}</img></a></h3>
+			<a class="directory_link" href="{% url 'directory_content' name=directory.name %}" >
+                <img class="directory_icon" src="{% static 'images/folder_close.png' %}">
+                    <span>{{ directory.name }}</span>
+                </img>
+            </a>
         </div>
     {% endfor %}
     <br>
@@ -24,7 +28,7 @@
             <h3><a class="notefile_link" href="{% url 'notefile' directory=notefile.directory notefile=notefile.name %}" >{{ notefile.name }}</a></h3>
  -->
             {% if request.path == '/srs/' %}
- 			<h3><a class="notefile_link" href="" >{{ notefile.name }}</a></h3>            
+ 			<h3><a class="notefile_link" href="{% url 'notefile_detail' name=notefile.name %}" >{{ notefile.name }}</a></h3>            
             {% else %}
             <h3><a class="notefile_link" href="{% url 'notefile' directory=notefile.directory notefile=notefile.name %}" >{{ notefile.name }}</a></h3>
             {% endif %}
