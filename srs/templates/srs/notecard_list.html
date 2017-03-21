@@ -20,11 +20,13 @@
  <div class="container" style="position:relative;">
     {% for i in "12345" %}
         {% if forloop.counter == 5 %}
+        {% if forloop.counter <= notecards.count %}
             <a class="imageDiv" tabindex="1" href="{% url 'notecard_detail' pk=notecards|lookup_pk:i %}">
-                {% if forloop.counter <= notecards.count %}
                     {{ notecards|lookup:i }}<br>{{ notecards|lookup_label:i }}
-                {% endif %}
             </a>
+        {% else %}
+        <a class="imageDiv" tabindex="1"></a>
+        {% endif %}
         {% elif forloop.counter <= notecards.count %}
             <a class="imageDiv" id="bottomDiv{{i}}" tabindex="1" href="{% url 'notecard_detail' pk=notecards|lookup_pk:i %}">
                 {{ notecards|lookup:i }}<br>{{ notecards|lookup_label:i }}
