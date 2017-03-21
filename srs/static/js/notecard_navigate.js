@@ -17,3 +17,6 @@ $(document).ready(function() {
     document.getElementById('bottomDiv1').focus(); 
 }	
 );
+
+var notecards = "{{ notecards|safe }}";
+//alert(notecards);
