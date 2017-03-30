@@ -1,6 +1,6 @@
 from django.conf.urls import url
 from django.contrib import admin
-from . import views
+from srs import views
 
 urlpatterns = [
     url(r'^$', views.welcome_text, name="welcome"),
@@ -8,7 +8,8 @@ urlpatterns = [
 	url(r'^login/', views.login),  
 	url(r'^notefile_list', views.notefile_list, name='notefile_list'),
 	url(r'^notefile/(?P<name>[-\w]+)/$', views.notefile_detail, name='notefile_detail'),
-	url(r'^notecard_list/(?P<name>[-\w]+)/$', views.notecard_list, name='notecard_list'),  
+	url(r'^notecard_list/(?P<name>[-\w]+)/$', views.notecard_list, name='notecard_list'),
+	url(r'^import_notecard/(?P<name>[-\w]+)/$', views.import_notecard, name='import_notecard'),
 	url(r'^notecard/(?P<pk>\d+)/$', views.notecard_detail, name='notecard_detail'),
 	url(r'^create_notefile', views.notefile_new, name='create_notefile'),
 	url(r'^contact/$', views.contact, name='contact'),
