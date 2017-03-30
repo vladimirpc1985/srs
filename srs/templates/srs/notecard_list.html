@@ -13,7 +13,6 @@
     <a><h2>Export</h2></a> 
     <a><h2>Label</h2></a> 
     <a href="{% url 'welcome' %}"><h2>Quit</h2></a>
-    {{notecards}}
 {% endblock %}
 
 {% block content %}
@@ -22,15 +21,15 @@
     {% for i in "12345" %}
         {% if forloop.counter == 5 %}
             {% if forloop.counter <= notecards.count %}
-                <a class="imageDiv" tabindex="1" href="{% url 'notecard_detail' pk=notecards|lookup_pk:i %}">
-                    {{ notecards|lookup:i }}<br>{{ notecards|lookup_label:i }}
+                <a class="imageDiv" id="bottomDiv5" tabindex="1" href="{% url 'notecard_detail' pk=notecards|lookup_pk:i %}">
+                    <!--{{ notecards|lookup:i }}<br>{{ notecards|lookup_label:i }}-->
                 </a>
             {% else %}
-                <a class="imageDiv" tabindex="1"></a>
+                <a class="imageDiv" id="bottomDiv5" tabindex="1"></a>
             {% endif %}
         {% elif forloop.counter <= notecards.count %}
             <a class="imageDiv" id="bottomDiv{{i}}" tabindex="1" href="{% url 'notecard_detail' pk=notecards|lookup_pk:i %}">
-                {{ notecards|lookup:i }}<br>{{ notecards|lookup_label:i }}
+                <!--{{ notecards|lookup:i }}<br>{{ notecards|lookup_label:i }}-->
             </a>
         {% else %}
             <a class="imageDiv" id="bottomDiv{{i}}" tabindex="1"></a>
@@ -38,6 +37,26 @@
     {% endfor %}
  </div>
 
+<script>
+alert("{{queryset}}");
+var notecards = (("{{queryset}}").replace(/&(l|g|quo)t;/g, function(a,b){
+                return {
+                    l   : '<',
+                    g   : '>',
+                    quo : '"'
+                }[b];
+            }));
+//notecards = JSON.parse(notecards);
+alert(notecards);
+alert(typeof notecards);
+if(typeof notecards =='object')
+{
+  alert("Hello");
+}
+else{
+    alert("World");
+}
+</script>
 <script type="text/javascript" src="{% static 'js/notecard_navigate.js' %}"></script>
 
 {% endblock %}
