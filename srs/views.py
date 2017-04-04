@@ -1,7 +1,10 @@
+import errno
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
 from django.contrib.auth import logout
 from django.core.files import File
+from django.contrib import messages
+from django.contrib.auth.models import User
 from srs.models import Directory, Notefile, Notecard
 from srs.forms import NotefileForm, DirectoryForm, ImportForm
 
@@ -105,6 +108,7 @@ def notecard_detail(request, pk):
     notecard = get_object_or_404(Notecard, pk=pk)
     return render(request, 'srs/notecard_detail.html', {'notecard': notecard})
 
+
 # def notecard_detail(request, pk):
 #     notecard = get_object_or_404(Notecard, pk=pk)
 #     if request.method == "POST":
@@ -133,21 +137,27 @@ def import_notecard(request, name):
         if form.is_valid():
             cd = form.cleaned_data
             path = cd.get('path')
-            print('path is ' + path)
-            readFile(path, name)
+            try:
+                readFile(request, path, name)
+                messages.add_message(request, messages.SUCCESS, 'Notefile was added to yout notefile.')
+            except:
+                messages.add_message(request, messages.ERROR, 'The path you have entered is not valid.')
             return redirect('notecard_list', name=name)
     else:
         form = ImportForm()
+
     return render(request, 'srs/import_notecard.html', {'form': form, 'name':name})
 
-def readFile(path, notefileName):
-    # open file in read-only mode
-    fileHandler = openFile(path, 'r')
+
+def readFile(request, path, notefileName):
+    # open binary file in read-only mode
+    fileHandler = openFile(path, 'rb')
     if fileHandler['opened']:
         # create Django File object using python's file object
         file = File(fileHandler['handler'])
-        readContent(file, notefileName)
+        readContent(request, file, notefileName)
         file.close()
+
 
 def openFile(path, mode):
     # open file using python's open method
@@ -158,27 +168,32 @@ def openFile(path, mode):
     except:
         return {'opened':False, 'handler':None}
 
-def readContent(file, notefileName):
-    # we have atleast empty file now
+
+def readContent(request, file, notefileName):
+    # we have at least empty file now
     # use lines to iterate over the file in lines.
     lines = []
-    for line in file.readlines():
+    for line in file:
+        line = line.replace(b'\t', b'')
+        line = line.replace(b'\r\n', b'')
         lines.append(line)
     #check if file is correct and create notecard if it's correct.
-    checkFileFormat(lines, notefileName)
+    checkFileFormat(request, lines, notefileName)
 
-def checkFileFormat(lines, notefileName):
+
+def checkFileFormat(request, lines, notefileName):
     #Check whether the length of the file is greater than 5 (at least 5 delimiters)
     length = len(lines)
     if length < 5:
         raise ValueError('File has not enough lines.')
     try:
         #Get indexes for delimiters
-        header_index = lines.index('$$<IMPORT>$$\n')
-        keyword_start_index = lines.index('*\n')
-        header_start_index = lines.index('!\n')
-        header_end_index = lines.index('$\n')
-        body_end_index = lines.index('#\n')
+        header_index = lines.index(b'$$<IMPORT>$$')
+        print(header_index)
+        keyword_start_index = lines.index(b'*')
+        header_start_index = lines.index(b'!')
+        header_end_index = lines.index(b'$')
+        body_end_index = lines.index(b'#')
         #Check for errors
         if header_index != 0:
             raise ValueError('The first line does not have the required header for the SQI file.')
@@ -193,29 +208,37 @@ def checkFileFormat(lines, notefileName):
         if header_end_index >= body_end_index:
             raise ValueError('Header-end and body-start delimiter has to be placed before body-end delimiter.')
         #Get keywords
-        keywords = ''
+        keywords = b''
         for i in range(length)[keyword_start_index+1:header_start_index]:
             if i+1 == header_start_index:
                 keywords += lines[i]
             else:
-                keywords += lines[i] + ', '
+                keywords += lines[i] + b', '
         #Get header/title of the notecard
-        header = ''
+        header = b''
         for i in range(length)[header_start_index+1:header_end_index]:
-            header += lines[i].strip('\n')
+            header += lines[i] + b'\r\n'
         #Get body of the notecard
-        body = ''
+        body = b''
         for i in range(length)[header_end_index+1:body_end_index]:
-            body += lines[i]
+            body += lines[i] + b'\r\n'
         #if everything's ok, then we create the notecard
-        createNotecard(keywords, header, body, notefileName)
+        createNotecard(request, keywords, header, body, notefileName)
     except ValueError as err:
         print(err.args)
 
-def createNotecard(keywords, header, body, notefileName):
-    if keywords != '' or header != '' or body != '':
+
+def createNotecard(request, keywords, header, body, notefileName):
+    bin_keywords = keywords.replace(b'\x8d',b'')
+    str_keywords = bin_keywords.decode('ascii')
+    bin_header = header.replace(b'\x8d',b'')
+    str_header = bin_header.decode('ascii')
+    bin_body = body.replace(b'\x8d',b'')
+    str_body = bin_body.decode('ascii')
+    if str_keywords != '' or str_header != '' or str_body != '':
         try:
             notefile_name = Notefile.objects.get(name=notefileName)
-            Notecard.objects.create(name=header, keywords=keywords, body = body, notefile = notefile_name)
+            user = User.objects.get(username=request.user.username)
+            Notecard.objects.create(author=user,name=str_header, keywords=str_keywords, body = str_body, notefile = notefile_name)
         except ValueError as err:
             print(err.args)

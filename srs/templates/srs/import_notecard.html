@@ -4,8 +4,15 @@
     <a href="{% url 'notecard_list' name=name %}"><h2>Main Menu</h2></a>
 {% endblock %}
 
-
 {% block content %}
+    {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
     <p>Please enter the name of the file to import from.</p>
     <form action="{% url 'import_notecard' name=name %}" method="POST">{% csrf_token %}
     	{{form.as_p}}

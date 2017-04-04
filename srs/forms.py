@@ -2,7 +2,7 @@ from django import forms
 from srs.models import Notefile, Directory
 
 class ImportForm(forms.Form):
-    path = forms.CharField(label='Path', max_length=20)
+    path = forms.CharField(label='Path', max_length=100)
 
 class NotefileForm(forms.ModelForm):
     class Meta:
