@@ -21,7 +21,7 @@ class Directory(models.Model):
             default=timezone.now)
     parent_directory = models.ForeignKey('self',related_name='child_directory', null=True, on_delete=models.CASCADE)
 
-    def create(self):
+    def create(self) -> object:
         self.created_date = timezone.now()
         self.save()
 
