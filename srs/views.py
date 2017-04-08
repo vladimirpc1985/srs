@@ -1,4 +1,4 @@
-import errno
+import os
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
 from django.contrib.auth import logout
@@ -237,3 +237,53 @@ def createNotecard(request, keywords, header, body, notefileName):
             Notecard.objects.create(author=user,name=str_header, keywords=str_keywords, body = str_body, notefile = notefile_name)
         except ValueError as err:
             print(err.args)
+
+
+def export_notecard(request, name):
+    if request.method == 'POST':
+        form = ImportForm(request.POST)
+        if form.is_valid():
+            #Get full path.
+            cd = form.cleaned_data
+            path = cd.get('path')
+            path = path.upper()
+            try:
+                create_file(name, path)
+            except:
+                messages.info(request, 'The path you have entered is not valid.')
+                return render(request, 'srs/export_notecard.html', {'form': form, 'name':name})
+            return redirect('notecard_list', name=name)
+    else:
+        form = ImportForm()
+
+    return render(request, 'srs/export_notecard.html', {'form': form, 'name':name})
+
+
+def create_file(name, path):
+    #Get notecard list associated to given notefile
+    notefile_Name = Notefile.objects.get(name=name)
+    notecards = Notecard.objects.filter(notefile=notefile_Name)
+    #Create file
+    new_file = open(path,'wb')
+    #Add required header for SQI file
+    new_file.write(b'$$<IMPORT>$$\n')
+    for notecard in notecards:
+        #Add keyword start delimiter
+        new_file.write(b'*\n')
+        #Add keywords
+        my_keywords_list = notecard.keywords.replace(' ','').split(',')
+        for kw in my_keywords_list:
+            new_file.write(bytes(kw,'utf-8'))
+            new_file.write(b'\n')
+        #Add KEYWORD-END & HEADER-START DELIMITER
+        new_file.write(b'!\n')
+        #Add header
+        new_file.write(bytes(notecard.name, 'utf-8'))
+        #Add HEADER-END & BODY-START DELIMITER
+        new_file.write(b'\n$\n')
+        #Add body
+        new_file.write(bytes(notecard.body, 'utf-8'))
+        #Add BODY-END DELIMITER
+        new_file.write(b'\n#\n')
+    #Close file
+    new_file.close()

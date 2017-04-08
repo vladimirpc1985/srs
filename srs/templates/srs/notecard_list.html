@@ -10,7 +10,7 @@
     <a><h2>Alpha</h2></a> 
     <a><h2>Revu</h2></a> 
     <a href="{% url 'import_notecard' name=notecards.0.notefile %}"><h2>Import</h2></a>
-    <a><h2>Export</h2></a> 
+    <a href="{% url 'export_notecard' name=notecards.0.notefile %}"><h2>Export</h2></a>
     <a><h2>Label</h2></a> 
     <a href="{% url 'welcome' %}"><h2>Quit</h2></a>
 {% endblock %}
