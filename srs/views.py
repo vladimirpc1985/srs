@@ -109,21 +109,6 @@ def notecard_detail(request, pk):
     return render(request, 'srs/notecard_detail.html', {'notecard': notecard})
 
 
-# def notecard_detail(request, pk):
-#     notecard = get_object_or_404(Notecard, pk=pk)
-#     if request.method == "POST":
-#         form = NotefileForm(request.POST)
-#         if form.is_valid():
-#             notecard = form.save(commit=False)
-#             notecard.author = request.user
-#             notecard.created_date = timezone.now()
-#             notecard.save()
-#             return redirect('notecard_detail')
-#     else:
-#         form = NotefileForm()
-#     return render(request, 'srs/notecard_detail.html', {'form': form})
-
-
 def about(request):
     return render(request, 'srs/about.html')
 
@@ -135,13 +120,23 @@ def import_notecard(request, name):
     if request.method == 'POST':
         form = ImportForm(request.POST)
         if form.is_valid():
+            #Get full path.
             cd = form.cleaned_data
             path = cd.get('path')
+            #To check if a notecard was created.
+            notefile_Name = Notefile.objects.get(name=name)
+            notecards = Notecard.objects.filter(notefile=notefile_Name)
+            notecards_count_before = notecards.count()
             try:
                 readFile(request, path, name)
-                messages.add_message(request, messages.SUCCESS, 'Notefile was added to yout notefile.')
+                notecards_count_after = notecards.count()
+                if notecards_count_after > notecards_count_before:
+                    return redirect('notecard_list', name=name)
+                else:
+                    messages.info(request, 'The path you have entered is not valid.')
+                    return render(request, 'srs/import_notecard.html', {'form': form, 'name':name})
             except:
-                messages.add_message(request, messages.ERROR, 'The path you have entered is not valid.')
+                messages.info(request, 'The path you have entered is not valid.')
             return redirect('notecard_list', name=name)
     else:
         form = ImportForm()
