@@ -3,11 +3,11 @@ $(document).keydown(
     {
     	if (e.keyCode == 38) { //Up
 			$(".imageDiv:focus").next().focus();
-            alert(notecards);
+            //alert(notecards);
         }
         if (e.keyCode == 40) { //Down
             $(".imageDiv:focus").prev().focus();
-            alert(notecards);
+            //alert(notecards);
         }
     }
 );

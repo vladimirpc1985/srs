@@ -38,24 +38,32 @@
  </div>
 
 <script>
-alert("{{queryset}}");
-var notecards = (("{{queryset}}").replace(/&(l|g|quo)t;/g, function(a,b){
+alert("{{notecards |safe }}");
+var Notecards = [];
+{% for notecard in notecards %}
+alert("{{notecard.name}}");
+//notecards.push(new Notecard("{{notecard.name}}", "MyCity ST", "555-555-5555", 0));
+{% endfor %}
+
+/*var notecards = (("{{queryset}}").replace(/&(l|g|quo)t;/g, function(a,b){
                 return {
                     l   : '<',
                     g   : '>',
                     quo : '"'
                 }[b];
-            }));
+            }));*/
 //notecards = JSON.parse(notecards);
-alert(notecards);
-alert(typeof notecards);
-if(typeof notecards =='object')
-{
-  alert("Hello");
+//alert(notecards);
+//alert(typeof notecards);
+
+function Notecard(name, keywords, label, body) {
+  this.name = name;
+  this.keywords = keywords;
+  this.label = label;
+  this.body = body;
+  // here you can add some logic for the distance field, if you like:
 }
-else{
-    alert("World");
-}
+
 </script>
 <script type="text/javascript" src="{% static 'js/notecard_navigate.js' %}"></script>
 
