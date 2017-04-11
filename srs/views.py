@@ -171,6 +171,7 @@ def readContent(request, file, notefileName):
     for line in file:
         line = line.replace(b'\t', b'')
         line = line.replace(b'\r\n', b'')
+        line = line.replace(b'\n', b'')
         lines.append(line)
     #check if file is correct and create notecard if it's correct.
     checkFileFormat(request, lines, notefileName)
@@ -184,41 +185,48 @@ def checkFileFormat(request, lines, notefileName):
     try:
         #Get indexes for delimiters
         header_index = lines.index(b'$$<IMPORT>$$')
-        print(header_index)
-        keyword_start_index = lines.index(b'*')
-        header_start_index = lines.index(b'!')
-        header_end_index = lines.index(b'$')
-        body_end_index = lines.index(b'#')
         #Check for errors
         if header_index != 0:
             raise ValueError('The first line does not have the required header for the SQI file.')
-        if keyword_start_index != header_index+1:
-            raise ValueError('The second line does not have the keyword start delimiter.')
-        if header_index >= keyword_start_index:
-            raise ValueError('Header has to be placed before keyword-start delimiter.')
-        if keyword_start_index >= header_start_index:
-            raise ValueError('Keyword-start delimiter has to be placed before keyword-end and header-start delimiter.')
-        if header_start_index >= header_end_index:
-            raise ValueError('Header-start delimiter has to be placed before header-end delimiter.')
-        if header_end_index >= body_end_index:
-            raise ValueError('Header-end and body-start delimiter has to be placed before body-end delimiter.')
-        #Get keywords
-        keywords = b''
-        for i in range(length)[keyword_start_index+1:header_start_index]:
-            if i+1 == header_start_index:
-                keywords += lines[i]
-            else:
-                keywords += lines[i] + b', '
-        #Get header/title of the notecard
-        header = b''
-        for i in range(length)[header_start_index+1:header_end_index]:
-            header += lines[i] + b'\r\n'
-        #Get body of the notecard
-        body = b''
-        for i in range(length)[header_end_index+1:body_end_index]:
-            body += lines[i] + b'\r\n'
-        #if everything's ok, then we create the notecard
-        createNotecard(request, keywords, header, body, notefileName)
+
+        length = len(lines)
+        current_line = header_index+1
+
+        while(current_line < length):
+            #Get indexes for delimiters
+            keyword_start_index = lines.index(b'*', current_line)
+            header_start_index = lines.index(b'!', current_line)
+            header_end_index = lines.index(b'$', current_line)
+            body_end_index = lines.index(b'#', current_line)
+
+            #Check for errors
+            if header_index >= keyword_start_index:
+                raise ValueError('Header has to be placed before keyword-start delimiter.')
+            if keyword_start_index >= header_start_index:
+                raise ValueError('Keyword-start delimiter has to be placed before keyword-end and header-start delimiter.')
+            if header_start_index >= header_end_index:
+                raise ValueError('Header-start delimiter has to be placed before header-end delimiter.')
+            if header_end_index >= body_end_index:
+                raise ValueError('Header-end and body-start delimiter has to be placed before body-end delimiter.')
+            #Get keywords
+            keywords = b''
+            for i in range(length)[keyword_start_index+1:header_start_index]:
+                if i+1 == header_start_index:
+                    keywords += lines[i]
+                else:
+                    keywords += lines[i] + b', '
+            #Get header/title of the notecard
+            header = b''
+            for i in range(length)[header_start_index+1:header_end_index]:
+                header += lines[i] + b'\r\n'
+            #Get body of the notecard
+            body = b''
+            for i in range(length)[header_end_index+1:body_end_index]:
+                body += lines[i] + b'\r\n'
+            #If everything's ok, then we create the notecard
+            createNotecard(request, keywords, header, body, notefileName)
+            #Update current_line so we can get the data from the next notecard.
+            current_line = body_end_index+1
     except ValueError as err:
         print(err.args)
 
@@ -233,8 +241,11 @@ def createNotecard(request, keywords, header, body, notefileName):
     if str_keywords != '' or str_header != '' or str_body != '':
         try:
             notefile_name = Notefile.objects.get(name=notefileName)
-            user = User.objects.get(username=request.user.username)
-            Notecard.objects.create(author=user,name=str_header, keywords=str_keywords, body = str_body, notefile = notefile_name)
+            if request.user.is_authenticated():
+                user = User.objects.get(username=request.user.username)
+                Notecard.objects.create(author=user,name=str_header, keywords=str_keywords, body = str_body, notefile = notefile_name)
+            else:
+                messages.info(request, 'You need to log in before using SRS import feature.')
         except ValueError as err:
             print(err.args)
 
