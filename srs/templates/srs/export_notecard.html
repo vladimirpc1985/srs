@@ -14,8 +14,8 @@
         </ul>
     {% endif %}
 
-    <p>Please enter the name of the file to import from.</p>
-    <form action="{% url 'import_notecard' name=name %}" method="POST">{% csrf_token %}
+    <p>Please enter the name of the file to export to.</p>
+    <form action="{% url 'export_notecard' name=name %}" method="POST">{% csrf_token %}
     	{{form.as_p}}
         <button type="submit" class="save btn btn-default">Save</button>
         <button type="submit" class="cancel btn btn-default">Cancel</button>

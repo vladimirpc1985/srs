@@ -1,4 +1,4 @@
-import errno
+import os
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
 from django.contrib.auth import logout
@@ -99,7 +99,7 @@ def notecard_list(request, name):
     notecards_count = notecards.count()
     index = 0
     if notecards_count == 0:
-        return render(request, 'srs/notecard_list_empty.html', {})
+        return render(request, 'srs/notecard_list_empty.html', {'notecards': notecards, 'notefile_name': name})
     else:
         auto_list = ""
         for notecard in notecards:
@@ -114,21 +114,6 @@ def notecard_detail(request, pk):
     return render(request, 'srs/notecard_detail.html', {'notecard': notecard})
 
 
-# def notecard_detail(request, pk):
-#     notecard = get_object_or_404(Notecard, pk=pk)
-#     if request.method == "POST":
-#         form = NotefileForm(request.POST)
-#         if form.is_valid():
-#             notecard = form.save(commit=False)
-#             notecard.author = request.user
-#             notecard.created_date = timezone.now()
-#             notecard.save()
-#             return redirect('notecard_detail')
-#     else:
-#         form = NotefileForm()
-#     return render(request, 'srs/notecard_detail.html', {'form': form})
-
-
 def about(request):
     return render(request, 'srs/about.html')
 
@@ -140,13 +125,23 @@ def import_notecard(request, name):
     if request.method == 'POST':
         form = ImportForm(request.POST)
         if form.is_valid():
+            #Get full path.
             cd = form.cleaned_data
             path = cd.get('path')
+            #To check if a notecard was created.
+            notefile_Name = Notefile.objects.get(name=name)
+            notecards = Notecard.objects.filter(notefile=notefile_Name)
+            notecards_count_before = notecards.count()
             try:
                 readFile(request, path, name)
-                messages.add_message(request, messages.SUCCESS, 'Notefile was added to yout notefile.')
+                notecards_count_after = notecards.count()
+                if notecards_count_after > notecards_count_before:
+                    return redirect('notecard_list', name=name)
+                else:
+                    messages.info(request, 'The path you have entered is not valid.')
+                    return render(request, 'srs/import_notecard.html', {'form': form, 'name':name})
             except:
-                messages.add_message(request, messages.ERROR, 'The path you have entered is not valid.')
+                messages.info(request, 'The path you have entered is not valid.')
             return redirect('notecard_list', name=name)
     else:
         form = ImportForm()
@@ -181,6 +176,7 @@ def readContent(request, file, notefileName):
     for line in file:
         line = line.replace(b'\t', b'')
         line = line.replace(b'\r\n', b'')
+        line = line.replace(b'\n', b'')
         lines.append(line)
     #check if file is correct and create notecard if it's correct.
     checkFileFormat(request, lines, notefileName)
@@ -194,41 +190,48 @@ def checkFileFormat(request, lines, notefileName):
     try:
         #Get indexes for delimiters
         header_index = lines.index(b'$$<IMPORT>$$')
-        print(header_index)
-        keyword_start_index = lines.index(b'*')
-        header_start_index = lines.index(b'!')
-        header_end_index = lines.index(b'$')
-        body_end_index = lines.index(b'#')
         #Check for errors
         if header_index != 0:
             raise ValueError('The first line does not have the required header for the SQI file.')
-        if keyword_start_index != header_index+1:
-            raise ValueError('The second line does not have the keyword start delimiter.')
-        if header_index >= keyword_start_index:
-            raise ValueError('Header has to be placed before keyword-start delimiter.')
-        if keyword_start_index >= header_start_index:
-            raise ValueError('Keyword-start delimiter has to be placed before keyword-end and header-start delimiter.')
-        if header_start_index >= header_end_index:
-            raise ValueError('Header-start delimiter has to be placed before header-end delimiter.')
-        if header_end_index >= body_end_index:
-            raise ValueError('Header-end and body-start delimiter has to be placed before body-end delimiter.')
-        #Get keywords
-        keywords = b''
-        for i in range(length)[keyword_start_index+1:header_start_index]:
-            if i+1 == header_start_index:
-                keywords += lines[i]
-            else:
-                keywords += lines[i] + b', '
-        #Get header/title of the notecard
-        header = b''
-        for i in range(length)[header_start_index+1:header_end_index]:
-            header += lines[i] + b'\r\n'
-        #Get body of the notecard
-        body = b''
-        for i in range(length)[header_end_index+1:body_end_index]:
-            body += lines[i] + b'\r\n'
-        #if everything's ok, then we create the notecard
-        createNotecard(request, keywords, header, body, notefileName)
+
+        length = len(lines)
+        current_line = header_index+1
+
+        while(current_line < length):
+            #Get indexes for delimiters
+            keyword_start_index = lines.index(b'*', current_line)
+            header_start_index = lines.index(b'!', current_line)
+            header_end_index = lines.index(b'$', current_line)
+            body_end_index = lines.index(b'#', current_line)
+
+            #Check for errors
+            if header_index >= keyword_start_index:
+                raise ValueError('Header has to be placed before keyword-start delimiter.')
+            if keyword_start_index >= header_start_index:
+                raise ValueError('Keyword-start delimiter has to be placed before keyword-end and header-start delimiter.')
+            if header_start_index >= header_end_index:
+                raise ValueError('Header-start delimiter has to be placed before header-end delimiter.')
+            if header_end_index >= body_end_index:
+                raise ValueError('Header-end and body-start delimiter has to be placed before body-end delimiter.')
+            #Get keywords
+            keywords = b''
+            for i in range(length)[keyword_start_index+1:header_start_index]:
+                if i+1 == header_start_index:
+                    keywords += lines[i]
+                else:
+                    keywords += lines[i] + b', '
+            #Get header/title of the notecard
+            header = b''
+            for i in range(length)[header_start_index+1:header_end_index]:
+                header += lines[i] + b'\r\n'
+            #Get body of the notecard
+            body = b''
+            for i in range(length)[header_end_index+1:body_end_index]:
+                body += lines[i] + b'\r\n'
+            #If everything's ok, then we create the notecard
+            createNotecard(request, keywords, header, body, notefileName)
+            #Update current_line so we can get the data from the next notecard.
+            current_line = body_end_index+1
     except ValueError as err:
         print(err.args)
 
@@ -243,7 +246,60 @@ def createNotecard(request, keywords, header, body, notefileName):
     if str_keywords != '' or str_header != '' or str_body != '':
         try:
             notefile_name = Notefile.objects.get(name=notefileName)
-            user = User.objects.get(username=request.user.username)
-            Notecard.objects.create(author=user,name=str_header, keywords=str_keywords, body = str_body, notefile = notefile_name)
+            if request.user.is_authenticated():
+                user = User.objects.get(username=request.user.username)
+                Notecard.objects.create(author=user,name=str_header, keywords=str_keywords, body = str_body, notefile = notefile_name)
+            else:
+                messages.info(request, 'You need to log in before using SRS import feature.')
         except ValueError as err:
             print(err.args)
+
+
+def export_notecard(request, name):
+    if request.method == 'POST':
+        form = ImportForm(request.POST)
+        if form.is_valid():
+            #Get full path.
+            cd = form.cleaned_data
+            path = cd.get('path')
+            path = path.upper()
+            try:
+                create_file(name, path)
+            except:
+                messages.info(request, 'The path you have entered is not valid.')
+                return render(request, 'srs/export_notecard.html', {'form': form, 'name':name})
+            return redirect('notecard_list', name=name)
+    else:
+        form = ImportForm()
+
+    return render(request, 'srs/export_notecard.html', {'form': form, 'name':name})
+
+
+def create_file(name, path):
+    #Get notecard list associated to given notefile
+    notefile_Name = Notefile.objects.get(name=name)
+    notecards = Notecard.objects.filter(notefile=notefile_Name)
+    #Create file
+    new_file = open(path,'wb')
+    #Add required header for SQI file
+    new_file.write(b'$$<IMPORT>$$\n')
+    for notecard in notecards:
+        #Add keyword start delimiter
+        new_file.write(b'*\n')
+        #Add keywords
+        my_keywords_list = notecard.keywords.replace(' ','').split(',')
+        for kw in my_keywords_list:
+            new_file.write(bytes(kw,'utf-8'))
+            new_file.write(b'\n')
+        #Add KEYWORD-END & HEADER-START DELIMITER
+        new_file.write(b'!\n')
+        #Add header
+        new_file.write(bytes(notecard.name, 'utf-8'))
+        #Add HEADER-END & BODY-START DELIMITER
+        new_file.write(b'\n$\n')
+        #Add body
+        new_file.write(bytes(notecard.body, 'utf-8'))
+        #Add BODY-END DELIMITER
+        new_file.write(b'\n#\n')
+    #Close file
+    new_file.close()
