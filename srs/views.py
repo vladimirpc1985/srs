@@ -101,7 +101,12 @@ def notecard_list(request, name):
     if notecards_count == 0:
         return render(request, 'srs/notecard_list_empty.html', {'notecards': notecards, 'notefile_name': name})
     else:
-        return render(request, 'srs/notecard_list.html', {'notecards': notecards, 'startIndex': index})
+        auto_list = ""
+        for notecard in notecards:
+           auto_list  += notecard.keywords + "$$"
+        auto_list = auto_list.split("$$")
+        auto_list = [x for x in auto_list if x != ""]
+        return render(request, 'srs/notecard_list.html', {'notecards': notecards, 'startIndex': index, 'auto_list': auto_list})
 
 
 def notecard_detail(request, pk):

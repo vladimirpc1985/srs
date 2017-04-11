@@ -2,9 +2,11 @@
 {% load app_filters static %}
 
 {% block site_content %}
-    <a><h2>Edit</h2></a>
-    <a><h2>Make</h2></a>
-    <a><h2>Delete</h2></a>
+
+    <div title="search_bar"><input type="text" id="autocomplete" placeholder="Enter Keywords"></div>
+    <a><h2>Edit</h2></a> 
+    <a><h2>Make</h2></a> 
+    <a><h2>Delete</h2></a> 
     <a><h2>Select</h2></a>
     <a><h2>Subject</h2></a>
     <a><h2>Alpha</h2></a>
@@ -16,8 +18,9 @@
 {% endblock %}
 
 {% block content %}
-
  <div class="container" style="position:relative;">
+
+    <div id="notecard_list" style="margin-top: 30px;">
     {% for i in "12345" %}
         {% if forloop.counter == 5 %}
         {% if forloop.counter <= notecards.count %}
@@ -36,8 +39,29 @@
 
         {% endif %}
     {% endfor %}
+</div>
  </div>
 
 <script type="text/javascript" src="{% static 'js/notecard_navigate.js' %}"></script>
+<script>
+    $(function(){
+        var list = [
+        {% for keyword in auto_list %}
+            { value: "{{keyword}}"},
+        {% endfor %}
+         ];
+
+        $('#autocomplete').autocomplete({
+            lookup: list
+        });
+     });
+
+    $("#autocomplete").keyup(function(){ 
+        /*NOW READS KEYS PRESSED BUT NOW WHEN VALUE IS CHANGED BY CLICKING*/
+        /*FILTER NOTECARDS BASED ON VALUES*/
+        /*PASS NEW LIST TO NOTECARD CONTAINER*/
+
+    });
+</script>
 
 {% endblock %}
