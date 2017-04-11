@@ -99,7 +99,7 @@ def notecard_list(request, name):
     notecards_count = notecards.count()
     index = 0
     if notecards_count == 0:
-        return render(request, 'srs/notecard_list_empty.html', {})
+        return render(request, 'srs/notecard_list_empty.html', {'notecards': notecards, 'notefile_name': name})
     else:
         return render(request, 'srs/notecard_list.html', {'notecards': notecards, 'startIndex': index})
 
