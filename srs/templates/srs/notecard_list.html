@@ -38,22 +38,37 @@
  </div>
 
 <script>
-alert("{{notecards |safe }}");
+//alert("{{notecards |safe }}");
+//alert("{{queryset}}");
+//var obj = jQuery.parseJSON( '{ "name": "John" }' );
+//alert( obj.name === "John" );
+
+var temp = "{{queryset}}";
+//alert(temp);
+var temp_ = temp.replace("&quot;[", "[");
+//alert(temp_);
+var temp__ = temp_.replace("]&quot;", "]");
+//alert(temp__);
 var Notecards = [];
 {% for notecard in notecards %}
-alert("{{notecard.name}}");
+/*var variable = "";*/
+//alert("{{ notecard }}");
+//echo = {{notecards.0.name}};
+//alert("{{notecards.0.name}}");
 //notecards.push(new Notecard("{{notecard.name}}", "MyCity ST", "555-555-5555", 0));
 {% endfor %}
 
-/*var notecards = (("{{queryset}}").replace(/&(l|g|quo)t;/g, function(a,b){
+var notecards = ((temp__).replace(/&(l|g|quo)t;/g, function(a,b){
                 return {
                     l   : '<',
                     g   : '>',
                     quo : '"'
                 }[b];
-            }));*/
-//notecards = JSON.parse(notecards);
+            }));
+alert(notecards);
+notecards = JSON.parse(notecards); //ARRAY OF JSON OBJECTS.
 //alert(notecards);
+//alert(notecards[0].fields.name);
 //alert(typeof notecards);
 
 function Notecard(name, keywords, label, body) {
@@ -63,7 +78,6 @@ function Notecard(name, keywords, label, body) {
   this.body = body;
   // here you can add some logic for the distance field, if you like:
 }
-
 </script>
 <script type="text/javascript" src="{% static 'js/notecard_navigate.js' %}"></script>
 
