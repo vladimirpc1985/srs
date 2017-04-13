@@ -18,66 +18,28 @@
 {% block content %}
 
  <div class="container" style="position:relative;">
-    {% for i in "12345" %}
-        {% if forloop.counter == 5 %}
-            {% if forloop.counter <= notecards.count %}
-                <a class="imageDiv" id="bottomDiv5" tabindex="1" href="{% url 'notecard_detail' pk=notecards|lookup_pk:i %}">
-                    <!--{{ notecards|lookup:i }}<br>{{ notecards|lookup_label:i }}-->
-                </a>
-            {% else %}
-                <a class="imageDiv" id="bottomDiv5" tabindex="1"></a>
-            {% endif %}
-        {% elif forloop.counter <= notecards.count %}
-            <a class="imageDiv" id="bottomDiv{{i}}" tabindex="1" href="{% url 'notecard_detail' pk=notecards|lookup_pk:i %}">
-                <!--{{ notecards|lookup:i }}<br>{{ notecards|lookup_label:i }}-->
-            </a>
-        {% else %}
-            <a class="imageDiv" id="bottomDiv{{i}}" tabindex="1"></a>
-        {% endif %}
-    {% endfor %}
+    <a class="imageDiv" id="bottomDiv5" tabindex="1"></a>
+    <a class="imageDiv" id="bottomDiv4" tabindex="1"></a>
+    <a class="imageDiv" id="bottomDiv3" tabindex="1"></a>
+    <a class="imageDiv" id="bottomDiv2" tabindex="1"></a>
+    <a class="imageDiv" id="bottomDiv1" tabindex="1"></a>
  </div>
 
 <script>
-//alert("{{notecards |safe }}");
-//alert("{{queryset}}");
-//var obj = jQuery.parseJSON( '{ "name": "John" }' );
-//alert( obj.name === "John" );
-
+var notecard_bottom = 1;
+var notecard_top = 5;
+var index = 1;
 var temp = "{{queryset}}";
-//alert(temp);
-var temp_ = temp.replace("&quot;[", "[");
-//alert(temp_);
-var temp__ = temp_.replace("]&quot;", "]");
-//alert(temp__);
-var Notecards = [];
-{% for notecard in notecards %}
-/*var variable = "";*/
-//alert("{{ notecard }}");
-//echo = {{notecards.0.name}};
-//alert("{{notecards.0.name}}");
-//notecards.push(new Notecard("{{notecard.name}}", "MyCity ST", "555-555-5555", 0));
-{% endfor %}
-
-var notecards = ((temp__).replace(/&(l|g|quo)t;/g, function(a,b){
+temp = temp.replace("&quot;[", "[");
+temp = temp.replace("]&quot;", "]");
+var notecards = ((temp).replace(/&(l|g|quo)t;/g, function(a,b){
                 return {
                     l   : '<',
                     g   : '>',
                     quo : '"'
                 }[b];
             }));
-alert(notecards);
 notecards = JSON.parse(notecards); //ARRAY OF JSON OBJECTS.
-//alert(notecards);
-//alert(notecards[0].fields.name);
-//alert(typeof notecards);
-
-function Notecard(name, keywords, label, body) {
-  this.name = name;
-  this.keywords = keywords;
-  this.label = label;
-  this.body = body;
-  // here you can add some logic for the distance field, if you like:
-}
 </script>
 <script type="text/javascript" src="{% static 'js/notecard_navigate.js' %}"></script>
 
