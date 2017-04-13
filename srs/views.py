@@ -7,7 +7,9 @@ from django.contrib import messages
 from django.contrib.auth.models import User
 from srs.models import Directory, Notefile, Notecard
 from srs.forms import NotefileForm, DirectoryForm, ImportForm
-
+from django.core import serializers
+import json
+from django.core.serializers.json import DjangoJSONEncoder
 
 def logout_view(request):
     logout(request)
@@ -96,6 +98,8 @@ def get_notefile(request):
 def notecard_list(request, name):
     notefile_Name = Notefile.objects.get(name=name)
     notecards = Notecard.objects.filter(notefile=notefile_Name)
+    queryset = serializers.serialize('json', notecards)
+    queryset = json.dumps(queryset)
     notecards_count = notecards.count()
     index = 0
     if notecards_count == 0:
@@ -106,7 +110,7 @@ def notecard_list(request, name):
            auto_list  += notecard.keywords + "$$"
         auto_list = auto_list.split("$$")
         auto_list = [x for x in auto_list if x != ""]
-        return render(request, 'srs/notecard_list.html', {'notecards': notecards, 'startIndex': index, 'auto_list': auto_list})
+        return render(request, 'srs/notecard_list.html', {'notecards': notecards, 'startIndex': index, 'queryset': queryset, 'auto_list': auto_list})
 
 
 def notecard_detail(request, pk):
