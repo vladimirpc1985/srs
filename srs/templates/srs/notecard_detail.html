@@ -7,6 +7,11 @@
 
 {% block content %}
     <div class="notecard">
-        <p>{{ notecard.label }}</p>
+        <h2>Title:</h2>
+        <p>{{ notecard.name }}</p>
+        <h2>Keywords:</h2>
+        <p>{{ notecard.keywords }}</p>
+        <h2>Body:</h2>
+        <p>{{ notecard.body }}</p>
     </div>
 {% endblock %}

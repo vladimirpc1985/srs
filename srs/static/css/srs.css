@@ -15,7 +15,7 @@ p
 { padding: 0 0 10px 0;
   color: #FFF;
   line-height: 1.7em;
-  font-size: 100% }
+  font-size: 130% }
 
 img
 { border: 0;}
@@ -50,7 +50,8 @@ a
   font-weight: bold;
   background: transparent;
   outline: none;
-  text-decoration: underline;}
+  /*text-decoration: underline;*/
+  text-decoration: none;}
 
 a:hover
 { text-decoration: none;}
@@ -431,7 +432,7 @@ ul img {
 .imageDiv
         {
             position: absolute;
-            top: 0px;
+            top: 10px;
             right: 0px;
             margin-left: 100px;
             background: #fff;
@@ -442,7 +443,7 @@ ul img {
             -webkit-box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3), 0 0 40px rgba(0, 0, 0, 0.1) inset;
             -moz-box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3), 0 0 40px rgba(0, 0, 0, 0.1) inset;
             box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3), 0 0 40px rgba(0, 0, 0, 0.1) inset;
-            width: 455px;
+            width: 425px;
             background-color:#2276D4;
             border-style: solid;
             border-color: white;
@@ -453,27 +454,27 @@ ul img {
 
 #bottomDiv4{
    /*position:relative;*/
-   top:100px;
+   top:110px;
    /*right:150px;*/
-   width: 495px;
+   width: 465px;
 }
 #bottomDiv3{
    /*position:relative;*/
-   top:200px;
-   width: 545px;
+   top:210px;
+   width: 515px;
    /*right:300px;*/
 }
 
 #bottomDiv2{
    /*position:relative;*/
-   top:300px;
-   width: 595px;
+   top:310px;
+   width: 565px;
    /*right:450px;*/
 }
 #bottomDiv1{
    /*position:relative;*/
-   top:400px;
-   width: 645px;
+   top:410px;
+   width: 615px;
    /*right:600px;*/
 }
 
@@ -510,4 +511,27 @@ ul img {
     text-decoration: none;
 }
 
+
+#autocomplete
+{ padding: 5px 0 0 10px;
+  height: 25px;
+  width: 205px;
+  text-shadow: 0px -1px 0px #000;
+  border-radius: 15px 15px 15px 15px;
+  -moz-border-radius: 15px 15px 15px 15px;
+  -webkit-border: 15px 15px 15px 15px;
+  -webkit-box-shadow: rgba(0, 0, 0, 0.5) 0px 0px 5px;
+  -moz-box-shadow: rgba(0, 0, 0, 0.5) 0px 0px 5px;
+  box-shadow: rgba(0, 0, 0, 0.5) 0px 0px 5px;
+  margin: 0 0 10px 0;} 
+
+
+.autocomplete-suggestions{
+  background-color: white;
+  text-shadow: 0px -1px 0px #000;
+  -webkit-border: 15px 15px 15px 15px;
+  -webkit-box-shadow: rgba(0, 0, 0, 0.5) 0px 0px 5px;
+  -moz-box-shadow: rgba(0, 0, 0, 0.5) 0px 0px 5px;
+  box-shadow: rgba(0, 0, 0, 0.5) 0px 0px 5px;}
+.autocomplete-suggestion{ border-bottom-style: solid; border-bottom-width: thin;}
 
