@@ -2,25 +2,29 @@ $(document).keydown(
     function(e)
     {
     	if (e.keyCode == 38 ) { //Up
-			$(".imageDiv:focus").prev().focus();
             if( INDEX > TOP && TOP < MAX_TOP){
                 TOP += 1;
                 BOTTOM = TOP - 4;
                 start = TOP - 5;
                 new_list = trim_list(notecards, start);
                 load_notecards(new_list);
-            }else if( INDEX < MAX_TOP){ INDEX++; }
+            }else if( INDEX < MAX_TOP){             
+            $(".imageDiv:focus").prev().focus();
+            INDEX++; 
+            }
              
         }
         if (e.keyCode == 40) { //Down
-            $(".imageDiv:focus").next().focus();
             if( INDEX < BOTTOM && BOTTOM > 1){
                 BOTTOM -= 1;
                 TOP = BOTTOM + 4 ;
                 start = TOP - 5;
                 new_list = trim_list(notecards, start);
                 load_notecards(new_list);
-            }else if( INDEX > 1){ INDEX--; }
+            }else if( INDEX > 1){ 
+                $(".imageDiv:focus").next().focus();
+                INDEX--; 
+            }
         }
     }
 );
