@@ -1,8 +1,8 @@
 $(document).keydown(
     function(e)
     {
-    	if (e.keyCode == 40 ) { //Up
-			$(".imageDiv:focus").next().focus();
+    	if (e.keyCode == 38 ) { //Up
+			$(".imageDiv:focus").prev().focus();
             if(index > notecard_top ){
                 notecard_top += 1;
                 start = notecard_top - 5
@@ -12,8 +12,8 @@ $(document).keydown(
             }
              
         }
-        if (e.keyCode == 38) { //Down
-            $(".imageDiv:focus").prev().focus();
+        if (e.keyCode == 40) { //Down
+            $(".imageDiv:focus").next().focus();
                 index--;
                 if(index < notecard_bottom){
                 notecard_bottom -= 1;
