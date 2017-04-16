@@ -37,11 +37,27 @@ $(document).ready(function() {
 );
 
 function load_notecards(notecards){
-     for(var i = 0; i < 5; i++) {
+    MAX_DISPLAY = ((notecards.length > 5 )? 5 : notecards.length);
+    EMPTY_DISPLAY = 5 - MAX_DISPLAY;
+    for(var i = 0; i < MAX_DISPLAY; i++) {
         var id =  'bottomDiv'+ (i+1);
         document.getElementById(id).innerHTML = notecards[i].fields.name + "<br>" + notecards[i].fields.body;
         document.getElementById(id).href = 'http://'+window.location.host+'/notecard/'+notecards[i].pk+'/';
-}
+        keywords_ = notecards[i].fields.keywords.split("$$");
+        for (j = 0; j < keywords_.length; j++) { 
+            document.getElementById(id).title += " " + keywords_[j];
+        }
+    }
+
+    for(var i = MAX_DISPLAY ; i < 5; i++) {
+        var id =  'bottomDiv'+ (i+1);
+        document.getElementById(id).innerHTML = "";
+        document.getElementById(id).href = "";
+        document.getElementById(id).title = "";
+        document.getElementById(id).removeAttribute("innerHTML");
+        document.getElementById(id).removeAttribute("href");
+        document.getElementById(id).removeAttribute("title");
+    }
 }
 
 function trim_list(notecards, index){

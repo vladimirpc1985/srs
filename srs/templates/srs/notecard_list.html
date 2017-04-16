@@ -53,16 +53,34 @@ var MAX_TOP = notecards.length;
          ];
 
         $('#autocomplete').autocomplete({
-            lookup: list
+            lookup: list,
+            onSelect: function (suggestion) {
+                autocomplete_search(notecards, suggestion.value);
+                document.getElementById('bottomDiv1').focus();
+            }
         });
      });
 
-    $("#autocomplete").keyup(function(){ 
-        /*NOW READS KEYS PRESSED BUT NOW WHEN VALUE IS CHANGED BY CLICKING*/
-        /*FILTER NOTECARDS BASED ON VALUES*/
-        /*PASS NEW LIST TO NOTECARD CONTAINER*/
-
+    $("#autocomplete").keyup(function(){
+        autocomplete_search(notecards, $(this).val());
     });
+
+    function autocomplete_search(notecards, keyword){
+        BOTTOM = 5;
+        sub_notecards = [];
+        for(i = 0; i < notecards.length; i++){ 
+            if(notecards[i].fields.keywords.toLowerCase().indexOf(keyword.toLowerCase()) !== -1){
+                sub_notecards.push(notecards[i]);
+            }
+        }
+        if(sub_notecards.length != 0){
+        MAX_TOP = sub_notecards.length;
+        BOTTOM = 1;
+        INDEX = 1;
+        TOP = ((MAX_TOP > 5 )? 5 : MAX_TOP);
+        load_notecards(sub_notecards);
+        }
+    }
 </script>
 
 {% endblock %}
