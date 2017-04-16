@@ -65,6 +65,11 @@ var MAX_TOP = notecards.length;
         autocomplete_search(notecards, $(this).val());
     });
 
+    $("#autocomplete").change(function(){
+        autocomplete_search(notecards, $(this).val());
+        document.getElementById('bottomDiv1').focus();
+    });
+
     function autocomplete_search(notecards, keyword){
         BOTTOM = 5;
         sub_notecards = [];
