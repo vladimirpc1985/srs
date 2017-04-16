@@ -27,9 +27,9 @@
  </div>
 
 <script>
-var notecard_bottom = 1;
-var notecard_top = 5;
-var index = 1;
+var BOTTOM = 1;
+var TOP = 5;
+var INDEX = 1;
 var temp = "{{queryset}}";
 temp = temp.replace("&quot;[", "[");
 temp = temp.replace("]&quot;", "]");
@@ -41,6 +41,7 @@ var notecards = ((temp).replace(/&(l|g|quo)t;/g, function(a,b){
                 }[b];
             }));
 notecards = JSON.parse(notecards); //ARRAY OF JSON OBJECTS.
+var MAX_TOP = notecards.length;
 </script>
 <script type="text/javascript" src="{% static 'js/notecard_navigate.js' %}"></script>
 <script>
