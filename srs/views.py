@@ -143,9 +143,11 @@ def import_notecard(request, name):
                     return redirect('notecard_list', name=name)
                 else:
                     messages.info(request, 'The path you have entered is not valid.')
+                    messages.info(request, path)
                     return render(request, 'srs/import_notecard.html', {'form': form, 'name':name})
             except:
                 messages.info(request, 'The path you have entered is not valid.')
+                messages.info(request, path)
             return redirect('notecard_list', name=name)
     else:
         form = ImportForm()
