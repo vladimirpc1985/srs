@@ -1,4 +1,3 @@
-import os
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
 from django.contrib.auth import logout
@@ -9,7 +8,6 @@ from srs.models import Directory, Notefile, Notecard
 from srs.forms import NotefileForm, DirectoryForm, ImportForm
 from django.core import serializers
 import json
-from django.core.serializers.json import DjangoJSONEncoder
 
 def logout_view(request):
     logout(request)
