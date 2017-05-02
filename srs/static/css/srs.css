@@ -168,6 +168,11 @@ ul#menu li:hover a
   background: #323232;
   text-shadow: none;}
 
+.semester{
+  text-decoration: underline;
+  margin-top: 30px;
+}
+
 #site_content
 { width: 940px;
   padding-left: 20px;
