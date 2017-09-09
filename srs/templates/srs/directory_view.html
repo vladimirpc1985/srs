@@ -32,7 +32,7 @@
     </div>
     <div class="notefile-container">        
         {% for notefile in notefiles %}
-            {% if pk == 1 %}
+            {% if parent == None %}
  			    <a class="notefile_link" href="{% url 'notefile_detail' name=notefile.name %}" >
                     <div class="notefile-listing">
                         <span>{{ notefile.name }}</span>
