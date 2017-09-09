@@ -216,7 +216,7 @@ ul#menu li:hover a
   -webkit-box-shadow: rgba(0, 0, 0, 0.5) 0px 0px 5px;
   -moz-box-shadow: rgba(0, 0, 0, 0.5) 0px 0px 5px;
   box-shadow: rgba(0, 0, 0, 0.5) 0px 0px 5px;}  
-
+  
 #content
 { width: 680px;
   margin-bottom: 20px;
@@ -226,7 +226,7 @@ ul#menu li:hover a
 { width: 680px;
   margin-top: 20px;
   margin-bottom: 20px;}
-  
+
 .content_image
 { float: left; 
   width: 150px;
@@ -241,6 +241,20 @@ ul#menu li:hover a
   padding: 5px;
   margin-right: 10px;
   float: left;}
+
+.underline{
+  text-decoration: underline;
+}
+
+.text-block{
+  width: 100%;
+  padding-bottom: 35px;
+}
+
+.content-box{
+  padding: 5em;
+  padding-top: 3em;
+}
   
 #content_bottom
  { width: 960px;
@@ -540,3 +554,60 @@ ul img {
   box-shadow: rgba(0, 0, 0, 0.5) 0px 0px 5px;}
 .autocomplete-suggestion{ border-bottom-style: solid; border-bottom-width: thin;}
 
+.directory-title{
+  margin-bottom: 40px;
+  margin-left: 18px;
+  margin-top: 5px;
+}
+
+.directory_icon{
+  height: 160px;
+  width: 160px;
+  margin-top: -60px;
+}
+
+.directory_icon:hover{
+  content: url("../images/folder_open.png");
+}
+
+.directory_link{ 
+  text-decoration: none;
+} 
+
+.directory-listing{
+  display:inline-block;
+}
+
+.directory-listing-inner{
+  max-width: 115px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  z-index: 100; 
+  position: relative; 
+  bottom: 60px; 
+  left: 23px;
+  pointer-events: none;
+}
+
+.notefile-container{
+  margin-top: -30px;
+  margin-left: 3px;
+}
+
+.notefile-listing{
+  display:inline-block;
+  width: 125px;
+  margin: 12px;
+  padding: 10px 5px 10px 5px;
+  background-color: #1a98ff;
+  max-width: 125px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border-radius: 10px;
+  color: white;
+  font-weight: bold;
+}
+
+.notefile-listing:hover{
+  background-color: #0070cc;
+}

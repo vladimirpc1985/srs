@@ -2,36 +2,50 @@
 {% load staticfiles %}
 
 {% block site_content %}
-    <a href="{% url 'create_directory' %}" ><h2>Create Directory</h2></a>
-    <a href="{% url 'create_notefile' %}" ><h2>Create Notefile</h2></a>
+    <a href="{% url 'create_directory' pk=pk %}" ><h2>Create Directory</h2></a>
+    <a href="{% url 'create_notefile' pk=pk %}" ><h2>Create Notefile</h2></a>
+    {% if pk != 1 %}
+        {% if parent.pk == 1 %}
+            <a href="{% url 'home_directory' %}" ><h2>Back</h2></a>
+        {% else %}
+            <a href="{% url 'directory_content' pk=parent.pk %}" ><h2>Back</h2></a>
+        {% endif %}
+    {% endif %}
 {% endblock %}
 
 {% block content %}
 
-	<div style='background-color: white; margin-bottom: 2em;'>{{ directories.0.parent_directory }}</div>
-    <style> .directory_icon:hover{ content: url("{% static 'images/folder_open.png' %}");} .directory_link{ text-decoration: none;} .directory_link span{ z-index: 100; position: relative; top: -40px; left: -110px;}</style>
-	{% for directory in directories %}
-        <div style="display:inline-block;" >
-			<a class="directory_link" href="{% url 'directory_content' name=directory.name %}" >
-                <img class="directory_icon" src="{% static 'images/folder_close.png' %}">
-                    <span>{{ directory.name }}</span>
-                </img>
-            </a>
-        </div>
-    {% endfor %}
-    <br>
-    {% for notefile in notefiles %}
-        <div style="display:inline-block;" >
-<!--             {% if notefile.directory == 'None' %}
-                notefile.directory = 'Home'
-            {% endif %}
-            <h3><a class="notefile_link" href="{% url 'notefile' directory=notefile.directory notefile=notefile.name %}" >{{ notefile.name }}</a></h3>
- -->
-            {% if request.path == '/srs/' %}
- 			<h3><a class="notefile_link" href="{% url 'notefile_detail' name=notefile.name %}" >{{ notefile.name }}</a></h3>            
+	<p class='underline directory-title'>{{ name }}</p>
+
+    <div class="directory-container">
+    	{% for directory in directories %}
+            <div class="directory-listing">
+    			<a class="directory_link" href="{% url 'directory_content' pk=directory.pk %}" >
+                    <img class="directory_icon" src="{% static 'images/folder_close.png' %}">
+                        <div class="directory-listing-inner">
+                            <span>{{ directory.name }}</span>
+                        </div>
+                    </img>
+                </a>
+            </div>
+        {% endfor %}
+    </div>
+    <div class="notefile-container">        
+        {% for notefile in notefiles %}
+            {% if pk == 1 %}
+ 			    <a class="notefile_link" href="{% url 'notefile_detail' name=notefile.name %}" >
+                    <div class="notefile-listing">
+                        <span>{{ notefile.name }}</span>
+                    </div>
+                </a>            
             {% else %}
-            <h3><a class="notefile_link" href="{% url 'notefile' directory=notefile.directory notefile=notefile.name %}" >{{ notefile.name }}</a></h3>
+                <a class="notefile_link" href="{% url 'notefile' directory=notefile.directory notefile=notefile.name %}" >
+                    <div class="notefile-listing">
+                        <span>{{ notefile.name }}</span>
+                    </div>
+                </a>
             {% endif %}
-        </div> 
-    {% endfor %}
+        {% endfor %}
+    </div>
+    
 {% endblock %}

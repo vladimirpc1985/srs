@@ -58,7 +58,7 @@
         {% if user.is_authenticated %}
         <li {% if "/srs/" in request.path %} class="current" {% endif %} ><a href="{% url 'home_directory' %}">SRS</a></li>
         {% endif %} 
-        <li {% if request.path == "/about/" %} class="current" {% endif %}><a href="{% url 'about' %}">About Us</a></li>
+        <li {% if request.path == "/about/" %} class="current" {% endif %}><a href="{% url 'about' %}">About</a></li>
         <li {% if request.path == "/contact/" %} class="current" {% endif %}><a href="{% url 'contact' %}">Contact Us</a></li>
         {% if user.is_authenticated %}
         <li><a id="last_nav" href="{% url 'logout' %}">Logout</a></li>
@@ -73,7 +73,7 @@
     <div id="site_content"> 
 
       {% block sidebar_content %}
-      {% endblock %}  
+      {% endblock %}
       <div id="content">
         <div class="content_item">
             {% block content %}
@@ -85,7 +85,7 @@
   <div id="footer">
     <p style='text-align: center;'>
         <span style='margin-bottom: 1em; display: block'>
-            Version 1.0 February 2017
+            Version 2.0 December 2017
         </span>
         <span>
             &copy;Copyright 2017. All rights reserved.

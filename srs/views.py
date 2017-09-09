@@ -23,29 +23,34 @@ def welcome_srs(request):
 
 
 def home_directory(request):
-    # notefiles = Notefile.objects.filter(author=request.user).filter(directory__isnull=True)
-    notefiles = Notefile.objects.filter(author=request.user)
-    directories = Directory.objects.filter(author=request.user).filter(parent_directory=2)
+    # get notefiles and directories that lie in the home directory (1)
+    notefiles = Notefile.objects.filter(author=request.user).filter(directory=1)
+    directories = Directory.objects.filter(author=request.user).filter(parent_directory=1)
     # Edit sos dynamic
-    return render(request, 'srs/directory_view.html', {'notefiles': notefiles, 'directories': directories})
+    return render(request, 'srs/directory_view.html', {'notefiles': notefiles, 'directories': directories, 'name': 'Home', 'pk': 1})
 
 
-def directory_content(request, name):
-    current_directory = Directory.objects.get(name=name)
-    notefiles = Notefile.objects.filter(author=request.user).filter(directory=current_directory.id)
-    directories = Directory.objects.filter(author=request.user).filter(parent_directory=current_directory.id)
-    return render(request, 'srs/directory_view.html', {'notefiles': notefiles, 'directories': directories})
+def directory_content(request, pk):
+    current_directory = Directory.objects.get(pk=pk)
+    notefiles = Notefile.objects.filter(author=request.user).filter(directory=current_directory.pk)
+    directories = Directory.objects.filter(author=request.user).filter(parent_directory=current_directory.pk)
+    return render(request, 'srs/directory_view.html', {'notefiles': notefiles, 'directories': directories, 'parent': current_directory.parent_directory, 'name': current_directory.name, 'pk': pk})
 
 
-def create_directory(request):
+def create_directory(request, pk):
+    parent = get_object_or_404(Directory, pk=pk)
     if request.method == "POST":
         form = DirectoryForm(request.POST)
         if form.is_valid():
             directory = form.save(commit=False)
             directory.author = request.user
             directory.created_date = timezone.now()
+            directory.parent_directory = parent
             directory.save()
-            return redirect('home_directory')
+            if pk=='1':
+                return redirect('home_directory')
+            else:
+                return redirect('directory_content', pk=pk)
     else:
         form = DirectoryForm()
     return render(request, 'srs/create_directory.html', {'form': form})
@@ -75,15 +80,20 @@ def notefile_details(request, directory, notefile):
     return render(request, 'srs/notefile_detail.html', {'notefile': notefile})
 
 
-def notefile_new(request):
+def notefile_new(request, pk):
+    parent = get_object_or_404(Directory, pk=pk)
     if request.method == "POST":
         form = NotefileForm(request.POST)
         if form.is_valid():
             notefile = form.save(commit=False)
             notefile.author = request.user
             notefile.created_date = timezone.now()
+            notefile.directory = parent
             notefile.save()
-            return redirect('notefile_list')
+            if pk=='1':
+                return redirect('home_directory')
+            else:
+                return redirect('directory_content', pk=pk)
     else:
         form = NotefileForm()
     return render(request, 'srs/create_notefile.html', {'form': form})
