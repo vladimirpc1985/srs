@@ -24,7 +24,7 @@ def welcome_srs(request):
 
 def home_directory(request):
     # get notefiles and directories that lie in the home directory
-    home_directory = Directory.objects.filter(author=request.user).filter(name='Home').get(parent_directory__isnull = True)
+    home_directory = Directory.objects.filter(author=request.user).get(parent_directory__isnull = True)
     print(home_directory)
     notefiles = Notefile.objects.filter(author=request.user).filter(directory=home_directory)
     directories = Directory.objects.filter(author=request.user).filter(parent_directory=home_directory)
@@ -41,7 +41,7 @@ def directory_content(request, pk):
 
 def create_directory(request, pk):
     parent = get_object_or_404(Directory, pk=pk)
-    home_directory = Directory.objects.filter(author=request.user).filter(name='Home').get(parent_directory__isnull = True)
+    home_directory = Directory.objects.filter(author=request.user).get(parent_directory__isnull = True)
     if request.method == "POST":
         form = DirectoryForm(request.POST)
         if form.is_valid():
@@ -85,7 +85,7 @@ def notefile_details(request, directory, notefile):
 
 def notefile_new(request, pk):
     parent = get_object_or_404(Directory, pk=pk)
-    home_directory = Directory.objects.filter(author=request.user).filter(name='Home').get(parent_directory__isnull = True)
+    home_directory = Directory.objects.filter(author=request.user).get(parent_directory__isnull = True)
     if request.method == "POST":
         form = NotefileForm(request.POST)
         if form.is_valid():
