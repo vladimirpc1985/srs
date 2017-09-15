@@ -2,6 +2,7 @@
 {% load staticfiles %}
 
 {% block site_content %}
+    <a href="{% url 'selection_view' %}" ><h2>Return to View Select</h2></a>
     <a href="{% url 'create_directory' pk=pk %}" ><h2>Create Directory</h2></a>
     <a href="{% url 'create_notefile' pk=pk %}" ><h2>Create Notefile</h2></a>
     {% if parent != None %}
@@ -15,12 +16,10 @@
 
 {% block content %}
 
-	<p class='underline directory-title'>{{ name }}</p>
-
     <div class="directory-container">
     	{% for directory in directories %}
             <div class="directory-listing">
-    			<a class="directory_link" href="{% url 'directory_content' pk=directory.pk %}" >
+    			<a class="directory_link" href="{% url 'directory_content' pk=directory.pk %}" title="{{ directory.name }}">
                     <img class="directory_icon" src="{% static 'images/folder_close.png' %}">
                         <div class="directory-listing-inner">
                             <span>{{ directory.name }}</span>
@@ -33,13 +32,13 @@
     <div class="notefile-container">        
         {% for notefile in notefiles %}
             {% if parent == None %}
- 			    <a class="notefile_link" href="{% url 'notefile_detail' name=notefile.name %}" >
+ 			    <a class="notefile_link" href="{% url 'notefile_detail' pk=notefile.pk %}" title="{{ notefile.name }}">
                     <div class="notefile-listing">
                         <span>{{ notefile.name }}</span>
                     </div>
                 </a>            
             {% else %}
-                <a class="notefile_link" href="{% url 'notefile' directory=notefile.directory notefile=notefile.name %}" >
+                <a class="notefile_link" href="{% url 'notefile_detail' pk=notefile.pk %}" >
                     <div class="notefile-listing">
                         <span>{{ notefile.name }}</span>
                     </div>

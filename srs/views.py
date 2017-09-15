@@ -25,38 +25,69 @@ def welcome_srs(request):
 def home_directory(request):
     # get notefiles and directories that lie in the home directory
     home_directory = Directory.objects.filter(author=request.user).get(parent_directory__isnull = True)
-    print(home_directory)
     notefiles = Notefile.objects.filter(author=request.user).filter(directory=home_directory)
     directories = Directory.objects.filter(author=request.user).filter(parent_directory=home_directory)
     # Edit sos dynamic
-    return render(request, 'srs/directory_view.html', {'notefiles': notefiles, 'directories': directories, 'name': 'Home', 'pk': home_directory.pk})
+    return render(request, 'srs/directory_view.html', {'notefiles': notefiles, 'directories': directories, 'path': '/', 'pk': home_directory.pk})
 
 
 def directory_content(request, pk):
+    home_directory = Directory.objects.filter(author=request.user).get(parent_directory__isnull = True)
     current_directory = Directory.objects.get(pk=pk)
     notefiles = Notefile.objects.filter(author=request.user).filter(directory=current_directory.pk)
     directories = Directory.objects.filter(author=request.user).filter(parent_directory=current_directory.pk)
-    return render(request, 'srs/directory_view.html', {'notefiles': notefiles, 'directories': directories, 'parent': current_directory.parent_directory, 'name': current_directory.name, 'pk': pk})
+
+    # calculate path
+    temp_directory = current_directory
+    path = ""
+    while(temp_directory != home_directory):
+        path = temp_directory.name + "/" + path
+        temp_directory = temp_directory.parent_directory
+    path = "/" + path
+
+    return render(request, 'srs/directory_view.html', {'notefiles': notefiles, 'directories': directories, 'parent': current_directory.parent_directory, 'path': path, 'pk': pk})
+
+
+def selection_view(request):
+    return render(request, 'srs/selection_view.html', {})
+
+
+# TODO add code to view (video_view.html) and create database table to store and access videos
+def video_list(request):
+    return render(request, 'srs/video_view.html', {})
 
 
 def create_directory(request, pk):
+    duplicate = False
     parent = get_object_or_404(Directory, pk=pk)
     home_directory = Directory.objects.filter(author=request.user).get(parent_directory__isnull = True)
+
+    # calculate path
+    temp_directory = parent
+    path = ""
+    while(temp_directory != home_directory):
+        path = temp_directory.name + "/" + path
+        temp_directory = temp_directory.parent_directory
+    path = "/" + path
+
     if request.method == "POST":
         form = DirectoryForm(request.POST)
         if form.is_valid():
-            directory = form.save(commit=False)
-            directory.author = request.user
-            directory.created_date = timezone.now()
-            directory.parent_directory = parent
-            directory.save()
-            if parent==home_directory:
-                return redirect('home_directory')
+            if Directory.objects.filter(parent_directory=parent).filter(name=form.cleaned_data.get('name')).exists():
+                duplicate = True;
             else:
-                return redirect('directory_content', pk=pk)
+                directory = form.save(commit=False)
+                directory.author = request.user
+                directory.created_date = timezone.now()
+                directory.parent_directory = parent
+                directory.save()
+                if parent==home_directory:
+                    return redirect('home_directory')
+                else:
+                    return redirect('directory_content', pk=pk)
     else:
         form = DirectoryForm()
-    return render(request, 'srs/create_directory.html', {'form': form})
+    return render(request, 'srs/create_directory.html', {'form': form, 'parent': parent, 'duplicate': duplicate, 'path': path})
 
 
 def login(request):
@@ -72,62 +103,106 @@ def notefile_list(request):
     return render(request, 'srs/notefile_list.html', {'notefiles': notefiles})
 
 
-def notefile_detail(request, name):
-    notefile = get_object_or_404(Notefile, name=name)
-    return render(request, 'srs/notefile_detail.html', {'notefile': notefile})
+def notefile_detail(request, pk):
+    notefile = get_object_or_404(Notefile, pk=pk)
+    home_directory = Directory.objects.filter(author=request.user).get(parent_directory__isnull = True)
 
+    # calculate path
+    temp_directory = notefile.directory
+    path = notefile.name + "/"
+    while(temp_directory != home_directory):
+        path = temp_directory.name + "/" + path
+        temp_directory = temp_directory.parent_directory
+    path = "/" + path
 
-def notefile_details(request, directory, notefile):
-    current_directory = Directory.objects.get(name=directory)
-    notefile = get_object_or_404(Notefile, name=notefile, directory=current_directory.id)
-    return render(request, 'srs/notefile_detail.html', {'notefile': notefile})
+    return render(request, 'srs/notefile_detail.html', {'notefile': notefile, 'path': path})
 
 
 def notefile_new(request, pk):
+    duplicate = False
     parent = get_object_or_404(Directory, pk=pk)
     home_directory = Directory.objects.filter(author=request.user).get(parent_directory__isnull = True)
+
+    # calculate path
+    temp_directory = parent
+    path = ""
+    while(temp_directory != home_directory):
+        path = temp_directory.name + "/" + path
+        temp_directory = temp_directory.parent_directory
+    path = "/" + path
+
+    if parent==home_directory:
+        parent_is_home = True
+    else:
+        parent_is_home = False
+
     if request.method == "POST":
         form = NotefileForm(request.POST)
         if form.is_valid():
-            notefile = form.save(commit=False)
-            notefile.author = request.user
-            notefile.created_date = timezone.now()
-            notefile.directory = parent
-            notefile.save()
-            if parent==home_directory:
-                return redirect('home_directory')
+            if Notefile.objects.filter(directory=parent).filter(name=form.cleaned_data.get('name')).exists():
+                duplicate = True;
             else:
-                return redirect('directory_content', pk=pk)
+                notefile = form.save(commit=False)
+                notefile.author = request.user
+                notefile.created_date = timezone.now()
+                notefile.directory = parent
+                notefile.save()
+                if parent_is_home:
+                    return redirect('home_directory')
+                else:
+                    return redirect('directory_content', pk=pk)
     else:
         form = NotefileForm()
-    return render(request, 'srs/create_notefile.html', {'form': form})
+    return render(request, 'srs/create_notefile.html', {'form': form, 'parent_is_home': parent_is_home, 'pk': pk, 'duplicate': duplicate, 'path': path})
 
 
+#TODO figure out where this is used and maybe replace name?
 def get_notefile(request):
     return request.GET.get('name')
 
 
-def notecard_list(request, name):
-    notefile_Name = Notefile.objects.get(name=name)
+def notecard_list(request, pk):
+    notefile_Name = Notefile.objects.get(pk=pk)
+    home_directory = Directory.objects.filter(author=request.user).get(parent_directory__isnull = True)
+
+    # calculate path
+    temp_directory = notefile_Name.directory
+    path = notefile_Name.name + "/"
+    while(temp_directory != home_directory):
+        path = temp_directory.name + "/" + path
+        temp_directory = temp_directory.parent_directory
+    path = "/" + path
+
     notecards = Notecard.objects.filter(notefile=notefile_Name)
     queryset = serializers.serialize('json', notecards)
     queryset = json.dumps(queryset)
     notecards_count = notecards.count()
     index = 0
     if notecards_count == 0:
-        return render(request, 'srs/notecard_list_empty.html', {'notecards': notecards, 'notefile_name': name})
+        return render(request, 'srs/notecard_list_empty.html', {'notecards': notecards, 'pk': pk, 'path': path})
     else:
         auto_list = ""
         for notecard in notecards:
            auto_list  += notecard.keywords + "$$"
         auto_list = auto_list.split("$$")
         auto_list = [x for x in auto_list if x != ""]
-        return render(request, 'srs/notecard_list.html', {'notecards': notecards, 'startIndex': index, 'queryset': queryset, 'auto_list': auto_list})
+        return render(request, 'srs/notecard_list.html', {'notecards': notecards, 'startIndex': index, 'queryset': queryset, 'auto_list': auto_list, 'pk': pk, 'path': path})
 
 
 def notecard_detail(request, pk):
     notecard = get_object_or_404(Notecard, pk=pk)
-    return render(request, 'srs/notecard_detail.html', {'notecard': notecard})
+    home_directory = Directory.objects.filter(author=request.user).get(parent_directory__isnull = True)
+
+    # calculate path
+    notefile_Name = notecard.notefile
+    temp_directory = notefile_Name.directory
+    path = notefile_Name.name + "/"
+    while(temp_directory != home_directory):
+        path = temp_directory.name + "/" + path
+        temp_directory = temp_directory.parent_directory
+    path = "/" + path
+
+    return render(request, 'srs/notecard_detail.html', {'notecard': notecard, 'pk': notecard.notefile.pk, 'path': path})
 
 
 def about(request):
@@ -137,7 +212,18 @@ def about(request):
 def contact(request):
     return render(request, 'srs/contact.html')
 
-def import_notecard(request, name):
+def import_notecard(request, pk):
+
+    # calculate path
+    notefile_Name = Notefile.objects.get(pk=pk)
+    home_directory = Directory.objects.filter(author=request.user).get(parent_directory__isnull = True)
+    temp_directory = notefile_Name.directory
+    path = notefile_Name.name + "/"
+    while(temp_directory != home_directory):
+        path = temp_directory.name + "/" + path
+        temp_directory = temp_directory.parent_directory
+    path = "/" + path
+
     if request.method == 'POST':
         form = ImportForm(request.POST)
         if form.is_valid():
@@ -145,33 +231,32 @@ def import_notecard(request, name):
             cd = form.cleaned_data
             path = cd.get('path')
             #To check if a notecard was created.
-            notefile_Name = Notefile.objects.get(name=name)
             notecards = Notecard.objects.filter(notefile=notefile_Name)
+            print(notecards.count())
             notecards_count_before = notecards.count()
             try:
-                readFile(request, path, name)
+                #TODO check if replacing name with pk broke this
+                readFile(request, path, pk)
                 notecards_count_after = notecards.count()
                 if notecards_count_after > notecards_count_before:
-                    return redirect('notecard_list', name=name)
+                    return redirect('notecard_list', pk=pk)
                 else:
                     messages.info(request, 'The path you have entered is not valid.')
-                    return render(request, 'srs/import_notecard.html', {'form': form, 'name':name})
             except:
                 messages.info(request, 'The path you have entered is not valid.')
-            return redirect('notecard_list', name=name)
     else:
         form = ImportForm()
 
-    return render(request, 'srs/import_notecard.html', {'form': form, 'name':name})
+    return render(request, 'srs/import_notecard.html', {'form': form, 'pk':pk, 'path': path})
 
 
-def readFile(request, path, notefileName):
+def readFile(request, path, notefilePK):
     # open binary file in read-only mode
     fileHandler = openFile(path, 'rb')
     if fileHandler['opened']:
         # create Django File object using python's file object
         file = File(fileHandler['handler'])
-        readContent(request, file, notefileName)
+        readContent(request, file, notefilePK)
         file.close()
 
 
@@ -185,7 +270,7 @@ def openFile(path, mode):
         return {'opened':False, 'handler':None}
 
 
-def readContent(request, file, notefileName):
+def readContent(request, file, notefilePK):
     # we have at least empty file now
     # use lines to iterate over the file in lines.
     lines = []
@@ -195,10 +280,12 @@ def readContent(request, file, notefileName):
         line = line.replace(b'\n', b'')
         lines.append(line)
     #check if file is correct and create notecard if it's correct.
-    checkFileFormat(request, lines, notefileName)
+    print("About to check format")
+    checkFileFormat(request, lines, notefilePk)
 
 
-def checkFileFormat(request, lines, notefileName):
+def checkFileFormat(request, lines, notefilePK):
+    print("checkingFormat")
     #Check whether the length of the file is greater than 5 (at least 5 delimiters)
     length = len(lines)
     if length < 5:
@@ -245,14 +332,15 @@ def checkFileFormat(request, lines, notefileName):
             for i in range(length)[header_end_index+1:body_end_index]:
                 body += lines[i] + b'\r\n'
             #If everything's ok, then we create the notecard
-            createNotecard(request, keywords, header, body, notefileName)
+            createNotecard(request, keywords, header, body, notefilePK)
             #Update current_line so we can get the data from the next notecard.
             current_line = body_end_index+1
     except ValueError as err:
         print(err.args)
 
 
-def createNotecard(request, keywords, header, body, notefileName):
+def createNotecard(request, keywords, header, body, notefilePK):
+    print("trying to create")
     bin_keywords = keywords.replace(b'\x8d',b'')
     str_keywords = bin_keywords.decode('ascii')
     bin_header = header.replace(b'\x8d',b'')
@@ -261,7 +349,7 @@ def createNotecard(request, keywords, header, body, notefileName):
     str_body = bin_body.decode('ascii')
     if str_keywords != '' or str_header != '' or str_body != '':
         try:
-            notefile_name = Notefile.objects.get(name=notefileName)
+            notefile_name = Notefile.objects.get(pk=notefilePK)
             if request.user.is_authenticated():
                 user = User.objects.get(username=request.user.username)
                 Notecard.objects.create(author=user,name=str_header, keywords=str_keywords, body = str_body, notefile = notefile_name)
@@ -271,7 +359,17 @@ def createNotecard(request, keywords, header, body, notefileName):
             print(err.args)
 
 
-def export_notecard(request, name):
+def export_notecard(request, pk):
+    # calculate path
+    notefile_Name = Notefile.objects.get(pk=pk)
+    home_directory = Directory.objects.filter(author=request.user).get(parent_directory__isnull = True)
+    temp_directory = notefile_Name.directory
+    path = notefile_Name.name + "/"
+    while(temp_directory != home_directory):
+        path = temp_directory.name + "/" + path
+        temp_directory = temp_directory.parent_directory
+    path = "/" + path
+
     if request.method == 'POST':
         form = ImportForm(request.POST)
         if form.is_valid():
@@ -280,20 +378,19 @@ def export_notecard(request, name):
             path = cd.get('path')
             path = path.upper()
             try:
-                create_file(name, path)
+                create_file(pk, path)
+                return redirect('notecard_list', pk=pk)
             except:
                 messages.info(request, 'The path you have entered is not valid.')
-                return render(request, 'srs/export_notecard.html', {'form': form, 'name':name})
-            return redirect('notecard_list', name=name)
     else:
         form = ImportForm()
 
-    return render(request, 'srs/export_notecard.html', {'form': form, 'name':name})
+    return render(request, 'srs/export_notecard.html', {'form': form, 'pk':pk, 'path': path})
 
 
-def create_file(name, path):
+def create_file(pk, path):
     #Get notecard list associated to given notefile
-    notefile_Name = Notefile.objects.get(name=name)
+    notefile_Name = Notefile.objects.get(pk=pk)
     notecards = Notecard.objects.filter(notefile=notefile_Name)
     #Create file
     new_file = open(path,'wb')

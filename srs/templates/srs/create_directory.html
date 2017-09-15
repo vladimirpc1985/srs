@@ -6,7 +6,14 @@
     <form method="POST" class="notefile-form">{% csrf_token %}
         {{ form.as_p }}
         <button type="submit" class="save btn btn-default">Save</button>
-        <button type="submit" class="cancel btn btn-default">Cancel</button>
+        {% if parent.parent_directory == None %}
+            <a href="{% url 'home_directory' %}" class="cancel btn btn-default">Cancel</a>
+        {% else %}
+            <a href="{% url 'directory_content' pk=parent.pk %}" class="cancel btn btn-default">Cancel</a>
+        {% endif %}
+        {% if duplicate %}
+            <p class="error">Error: A directory with that name already exists in the current directory!</p>
+        {% endif %}
     </form>
 
 

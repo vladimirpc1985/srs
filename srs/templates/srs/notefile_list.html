@@ -1,13 +1,15 @@
 {% extends 'srs/base_srs.html' %}
 
 {% block site_content %}
-    <a href="{% url 'welcome' %}"><h2>Welcome Menu</h2></a> 
+    <a href="{% url 'selection_view' %}"><h2>Return to View Select</h2></a>
 {% endblock %}
 
 {% block content %}
     {% for notefile in notefiles %}
-        <div style="display:inline-block;" >
-			<h3><a href="{% url 'notefile_detail' name=notefile.name %}" >{{ notefile.name }}</a></h3>
-        </div>
+		<a href="{% url 'notefile_detail' pk=notefile.pk %}" class="notefile_link" title="{{ notefile.name }}">
+			<div class="notefile-listing">
+				<span>{{ notefile.name }}</span>
+			</div>
+		</a>
     {% endfor %}
 {% endblock %}

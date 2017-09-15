@@ -52,11 +52,17 @@
       </div><!--close banner-->
     </div><!--close header-->
 
+    {% if path != NONE %}
+        <div class="path">
+          <strong><p>Path: {{ path }}</p></strong>
+        </div>
+    {% endif %}
+
     <div id="menubar">
       <ul id="menu">
         <li {% if request.path == "/" %} class="current" {% endif %} ><a href="{% url 'welcome' %}">Home</a></li>
         {% if user.is_authenticated %}
-        <li {% if "/srs/" in request.path %} class="current" {% endif %} ><a href="{% url 'home_directory' %}">SRS</a></li>
+        <li {% if "/srs/" in request.path %} class="current" {% endif %} ><a href="{% url 'selection_view' %}">SRS</a></li>
         {% endif %} 
         <li {% if request.path == "/about/" %} class="current" {% endif %}><a href="{% url 'about' %}">About</a></li>
         <li {% if request.path == "/contact/" %} class="current" {% endif %}><a href="{% url 'contact' %}">Contact Us</a></li>

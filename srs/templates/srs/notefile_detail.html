@@ -1,8 +1,9 @@
 {% extends 'srs/base_srs.html' %}
 
 {% block site_content %}
-    <a href="{% url 'notecard_list' name=notefile.name %}"><h2>Main Menu</h2></a>
-    <a href="{% url 'welcome' %}"><h2>Welcome Menu</h2></a> 
+	<a href="{% url 'selection_view' %}"><h2>Return to View Select</h2></a>
+    <a href="{% url 'notecard_list' pk=notefile.pk %}"><h2>Main Menu</h2></a>
+    <a href="{% url 'directory_content' pk=notefile.directory.pk%}"><h2>Back</h2></a>
 {% endblock %}
 
 {% block content %}

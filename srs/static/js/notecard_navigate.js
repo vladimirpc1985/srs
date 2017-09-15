@@ -42,7 +42,7 @@ function load_notecards(notecards){
     for(var i = 0; i < MAX_DISPLAY; i++) {
         var id =  'bottomDiv'+ (i+1);
         document.getElementById(id).innerHTML = notecards[i].fields.name + "<br>" + notecards[i].fields.body;
-        document.getElementById(id).href = 'http://'+window.location.host+'/notecard/'+notecards[i].pk+'/';
+        document.getElementById(id).href = 'http://'+window.location.host+'/srs/notecard/'+notecards[i].pk+'/';
         keywords_ = notecards[i].fields.keywords.split("$$");
         for (j = 0; j < keywords_.length; j++) { 
             document.getElementById(id).title += " " + keywords_[j];

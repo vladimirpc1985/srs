@@ -1,23 +1,21 @@
 {% extends 'srs/base_srs.html' %}
 
 {% block site_content %}
-    <a href="{% url 'notecard_list' name=name %}"><h2>Main Menu</h2></a>
+    <a href="{% url 'notecard_list' pk=pk %}"><h2>Main Menu</h2></a>
 {% endblock %}
 
 {% block content %}
-
+    <p>Please enter the name of the file to export to.</p>
+    <form action="{% url 'export_notecard' pk=pk %}" method="POST">{% csrf_token %}
+    	{{form.as_p}}
+        <button type="submit" class="save btn btn-default">Save</button>
+        <a href="{% url 'notecard_list' pk=pk %}" class="cancel btn btn-default">Cancel</a>
+    </form>
     {% if messages %}
         <ul class="messages">
             {% for message in messages %}
-            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+            <li{% if message.tags %} class="error {{ message.tags }}"{% endif %}>{{ message }}</li>
             {% endfor %}
         </ul>
     {% endif %}
-
-    <p>Please enter the name of the file to export to.</p>
-    <form action="{% url 'export_notecard' name=name %}" method="POST">{% csrf_token %}
-    	{{form.as_p}}
-        <button type="submit" class="save btn btn-default">Save</button>
-        <button type="submit" class="cancel btn btn-default">Cancel</button>
-</form>
 {% endblock %}
