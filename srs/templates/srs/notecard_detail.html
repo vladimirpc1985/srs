@@ -22,11 +22,13 @@
         <h2>Videos:</h2>
         {% for video in videos %}
             <div >
-                <span>{{ video.url }}</span>
+                <span><font color="white">{{ video.url }}</span>
                 <iframe src='{{ video.url }}' class="video_link" frameborder="0" allowfullscreen></iframe>
+                <br />
+                <br />
+                <br />
             </div>
         {% endfor %}
-        <iframe id="videoFrame" width="560" src="https://www.youtube.com/watch?v=amtuB-2wGeQ" height="315" frameborder="0" onLoad="iframeDidLoad();" allowfullscreen></iframe>
     </div>
 
 {% endblock %}

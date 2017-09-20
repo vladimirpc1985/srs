@@ -8,8 +8,12 @@
 {% block content %}
     {% for video in videos %}
         <div >
-            <span>{{ video.url }}</span>
+            <span><font color="white">{{ video.url }}</font></span>
+            <br />
             <iframe src='{{ video.url }}' class="video_link" frameborder="0" allowfullscreen></iframe>
+            <br />
+            <br />
+            <br />
         </div>
     {% endfor %}
 {% endblock %}
