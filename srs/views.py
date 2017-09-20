@@ -238,7 +238,7 @@ def create_video(request, pk):
             return redirect('notecard_detail', pk=pk)
     else:
         form = VideoForm()
-    return render(request, 'srs/create_video.html', {'form': form})
+    return render(request, 'srs/create_video.html', {'form': form, 'pk':pk})
 
 
 def about(request):
