@@ -674,6 +674,10 @@ input{
   margin-bottom: 0;
 }
 
+.email{
+  color: inherit;
+}
+
 .video_link{
     width: 560px;
     height: 315px;
