@@ -19,6 +19,7 @@ urlpatterns = [
 	url(r'^srs/directory_list/$', views.home_directory, name='home_directory'),
 	url(r'^srs/create_directory/(?P<pk>\d+)/$', views.create_directory, name='create_directory'),
 	url(r'^srs/directory_list/(?P<pk>\d+)/$', views.directory_content, name='directory_content'),
+	url(r'^srs/create_video/(?P<pk>\d+)/$', views.create_video, name='create_video'),
 	url(r'^admin/', admin.site.urls, name='login_redirect'),
 	url(r'^logout/$', views.logout_view, name='logout'),
 	url(r'^srs/video_list/$', views.video_list, name='video_list'),

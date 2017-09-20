@@ -677,3 +677,8 @@ input{
 .email{
   color: inherit;
 }
+
+.video_link{
+    width: 560px;
+    height: 315px;
+}

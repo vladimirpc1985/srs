@@ -7,6 +7,11 @@
 {% endblock %}
 
 {% block content %}
+    <div>
+        <a href="{% url 'create_video' pk=pk %}" class="top-menu" style="font-size:24px; float: right;" ><i class="fa fa-youtube-square"></i></a>
+        <!--TODO: Add audio functionality-->
+        <a href="{% url 'create_video' pk=pk %}" class="top-menu" style="font-size:24px; float: right;" ><i class="fa fa-play-circle-o"></i></a>
+    </div>
     <div class="notecard">
         <h2>Title:</h2>
         <p>{{ notecard.name }}</p>
@@ -14,5 +19,16 @@
         <p>{{ notecard.keywords }}</p>
         <h2>Body:</h2>
         <p>{{ notecard.body }}</p>
+        <h2>Videos:</h2>
+        {% for video in videos %}
+            <div >
+                <span><font color="white">{{ video.url }}</span>
+                <iframe src='{{ video.url }}' class="video_link" frameborder="0" allowfullscreen></iframe>
+                <br />
+                <br />
+                <br />
+            </div>
+        {% endfor %}
     </div>
+
 {% endblock %}
