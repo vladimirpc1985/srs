@@ -4,8 +4,8 @@ from django.contrib.auth import logout
 from django.core.files import File
 from django.contrib import messages
 from django.contrib.auth.models import User
-from srs.models import Directory, Notefile, Notecard
-from srs.forms import NotefileForm, DirectoryForm, ImportForm
+from srs.models import Directory, Notefile, Notecard, Video
+from srs.forms import NotefileForm, DirectoryForm, ImportForm, VideoForm
 from django.core import serializers
 import json
 
@@ -52,12 +52,49 @@ def selection_view(request):
     return render(request, 'srs/selection_view.html', {})
 
 
-# TODO add code to view (video_view.html) and create database table to store and access videos
 def video_list(request):
-    return render(request, 'srs/video_view.html', {})
-
+    videos = Video.objects.filter(created_date__lte=timezone.now())
+    return render(request, 'srs/video_view.html', {'videos': videos})
 
 def create_directory(request, pk):
+    duplicate = False
+    parent = get_object_or_404(Directory, pk=pk)
+    home_directory = Directory.objects.filter(author=request.user).get(parent_directory__isnull = True)
+
+    # calculate path
+    temp_directory = parent
+    path = ""
+    while(temp_directory != home_directory):
+        path = temp_directory.name + "/" + path
+        temp_directory = temp_directory.parent_directory
+    path = "/" + path
+
+    if parent==home_directory:
+        parent_is_home = True
+    else:
+        parent_is_home = False
+
+    if request.method == "POST":
+        form = NotefileForm(request.POST)
+        if form.is_valid():
+            if Notefile.objects.filter(directory=parent).filter(name=form.cleaned_data.get('name')).exists():
+                duplicate = True;
+            else:
+                notefile = form.save(commit=False)
+                notefile.author = request.user
+                notefile.created_date = timezone.now()
+                notefile.directory = parent
+                notefile.save()
+                if parent_is_home:
+                    return redirect('home_directory')
+                else:
+                    return redirect('directory_content', pk=pk)
+    else:
+        form = NotefileForm()
+    return render(request, 'srs/create_notefile.html', {'form': form, 'parent_is_home': parent_is_home, 'pk': pk, 'duplicate': duplicate, 'path': path})
+
+
+def ftory(request, pk):
     duplicate = False
     parent = get_object_or_404(Directory, pk=pk)
     home_directory = Directory.objects.filter(author=request.user).get(parent_directory__isnull = True)
@@ -202,7 +239,29 @@ def notecard_detail(request, pk):
         temp_directory = temp_directory.parent_directory
     path = "/" + path
 
-    return render(request, 'srs/notecard_detail.html', {'notecard': notecard, 'pk': notecard.notefile.pk, 'path': path})
+    # Get the list of videos associated with this notecard.
+    videos = Video.objects.filter(notecard__name=notecard.name)
+    print("Number of videos is ")
+    print(videos.count())
+
+    return render(request, 'srs/notecard_detail.html', {'notecard': notecard, 'pk': notecard.notefile.pk, 'path': path, 'videos': videos })
+
+
+def create_video(request, pk):
+    #parentNotecard = get_object_or_404(Notecard, pk=pk)
+    #print(parentNotecard)
+    if(request.method == "POST"):
+        form = VideoForm(request.POST)
+        if form.is_valid():
+            video = form.save(commit=False)
+            video.author = request.user
+            video.created_date = timezone.now()
+            #video.notecard = parentNotecard
+            video.save()
+            return redirect('home_directory')
+    else:
+        form = VideoForm()
+    return render(request, 'srs/create_video.html', {'form': form})
 
 
 def about(request):
@@ -340,7 +399,6 @@ def checkFileFormat(request, lines, notefilePK):
 
 
 def createNotecard(request, keywords, header, body, notefilePK):
-    print("trying to create")
     bin_keywords = keywords.replace(b'\x8d',b'')
     str_keywords = bin_keywords.decode('ascii')
     bin_header = header.replace(b'\x8d',b'')

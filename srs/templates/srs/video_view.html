@@ -6,7 +6,10 @@
 {% endblock %}
 
 {% block content %}
-
-	<p>Add some code here to show all the videos!</p>
-
+    {% for video in videos %}
+        <div >
+            <span>{{ video.url }}</span>
+            <iframe src='{{ video.url }}' class="video_link" frameborder="0" allowfullscreen></iframe>
+        </div>
+    {% endfor %}
 {% endblock %}

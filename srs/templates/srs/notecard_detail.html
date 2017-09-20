@@ -7,6 +7,12 @@
 {% endblock %}
 
 {% block content %}
+    <div>
+        <a href="{% url 'create_video' pk=pk %}" class="top-menu" style="font-size:24px; float: right;" ><i class="fa fa-youtube-square"></i></a>
+
+        <button style="font-size:24px; float: right;" onclick="addVideo()"> <i class="fa fa-youtube-square"></i></button>
+        <button style="font-size:24px; float: right;" onclick="addAudio()"><i class="fa fa-play-circle-o"></i> </button>
+    </div>
     <div class="notecard">
         <h2>Title:</h2>
         <p>{{ notecard.name }}</p>
@@ -14,5 +20,51 @@
         <p>{{ notecard.keywords }}</p>
         <h2>Body:</h2>
         <p>{{ notecard.body }}</p>
+        <h2>Videos:</h2>
+        {% for video in videos %}
+            <div >
+                <span>{{ video.url }}</span>
+                <iframe src='{{ video.url }}' class="video_link" frameborder="0" allowfullscreen></iframe>
+            </div>
+        {% endfor %}
+        <iframe id="videoFrame" width="560" src="https://www.youtube.com/watch?v=amtuB-2wGeQ" height="315" frameborder="0" onLoad="iframeDidLoad();" allowfullscreen></iframe>
     </div>
+
+    <script>
+    function iframeDidLoad() {
+        <!--alert('Done');-->
+    }
+    function checkUrl(url) {
+        var request = false;
+        if (window.XMLHttpRequest) {
+            request = new XMLHttpRequest;
+        } else if (window.ActiveXObject) {
+            request = new ActiveXObject("Microsoft.XMLHttp");
+        }
+
+        if (request) {
+            request.open("GET", url);
+            if (request.status == 200) { return true; }
+        }
+
+        return false;
+    }
+
+    function addVideo() {
+        var defaultMessage = "Your video's link goes here";
+        var videoURL = prompt("Please enter your video URL:", defaultMessage);
+        if (videoURL == null || videoURL == "" || videoURL == defaultMessage) {
+            window.alert("Your video's URL is invalid. Please try again.");
+        }
+        else {
+            <!-- TODO: Check that URL is valid -->
+            <!-- TODO: Since video URL is valid, add video to database -->
+            window.alert(videoURL);
+        }
+    }
+    function addAudio() {
+        window.alert("Adding audio");
+    }
+    </script>
+
 {% endblock %}
