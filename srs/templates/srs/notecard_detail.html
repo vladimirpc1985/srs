@@ -8,7 +8,7 @@
 
 {% block content %}
     <div>
-        <a href="{% url 'create_video' pk=pk %}" class="top-menu" style="font-size:24px; float: right;" ><i class="fa fa-youtube-square"></i></a>
+        <a href="{% url 'create_video' pk=notecard.pk %}" class="top-menu" style="font-size:24px; float: right;" ><i class="fa fa-youtube-square"></i></a>
         <!--TODO: Add audio functionality-->
         <a href="{% url 'create_video' pk=pk %}" class="top-menu" style="font-size:24px; float: right;" ><i class="fa fa-play-circle-o"></i></a>
     </div>

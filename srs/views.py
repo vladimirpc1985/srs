@@ -248,17 +248,16 @@ def notecard_detail(request, pk):
 
 
 def create_video(request, pk):
-    #parentNotecard = get_object_or_404(Notecard, pk=pk)
-    #print(parentNotecard)
+    parentNotecard = get_object_or_404(Notecard, pk=pk)
     if(request.method == "POST"):
         form = VideoForm(request.POST)
         if form.is_valid():
             video = form.save(commit=False)
             video.author = request.user
             video.created_date = timezone.now()
-            #video.notecard = parentNotecard
+            video.notecard = parentNotecard
             video.save()
-            return redirect('home_directory')
+            return redirect('notecard_detail', pk=pk)
     else:
         form = VideoForm()
     return render(request, 'srs/create_video.html', {'form': form})
