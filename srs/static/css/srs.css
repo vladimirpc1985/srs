@@ -673,3 +673,7 @@ input{
 .messages{
   margin-bottom: 0;
 }
+
+.email{
+  color: inherit;
+}

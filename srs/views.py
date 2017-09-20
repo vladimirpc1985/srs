@@ -22,6 +22,17 @@ def welcome_srs(request):
     return render(request, 'srs/welcome_srs.html', {})
 
 
+def getPath(request, current_directory):
+    home_directory = Directory.objects.filter(author=request.user).get(parent_directory__isnull = True)
+
+    path = ""
+    while(current_directory != home_directory):
+        path = current_directory.name + "/" + path
+        current_directory = current_directory.parent_directory
+    path = "/" + path
+    return path
+
+
 def home_directory(request):
     # get notefiles and directories that lie in the home directory
     home_directory = Directory.objects.filter(author=request.user).get(parent_directory__isnull = True)
@@ -38,12 +49,7 @@ def directory_content(request, pk):
     directories = Directory.objects.filter(author=request.user).filter(parent_directory=current_directory.pk)
 
     # calculate path
-    temp_directory = current_directory
-    path = ""
-    while(temp_directory != home_directory):
-        path = temp_directory.name + "/" + path
-        temp_directory = temp_directory.parent_directory
-    path = "/" + path
+    path = getPath(request, current_directory)
 
     return render(request, 'srs/directory_view.html', {'notefiles': notefiles, 'directories': directories, 'parent': current_directory.parent_directory, 'path': path, 'pk': pk})
 
@@ -63,12 +69,7 @@ def create_directory(request, pk):
     home_directory = Directory.objects.filter(author=request.user).get(parent_directory__isnull = True)
 
     # calculate path
-    temp_directory = parent
-    path = ""
-    while(temp_directory != home_directory):
-        path = temp_directory.name + "/" + path
-        temp_directory = temp_directory.parent_directory
-    path = "/" + path
+    path = getPath(request, parent)
 
     if request.method == "POST":
         form = DirectoryForm(request.POST)
@@ -105,15 +106,9 @@ def notefile_list(request):
 
 def notefile_detail(request, pk):
     notefile = get_object_or_404(Notefile, pk=pk)
-    home_directory = Directory.objects.filter(author=request.user).get(parent_directory__isnull = True)
 
     # calculate path
-    temp_directory = notefile.directory
-    path = notefile.name + "/"
-    while(temp_directory != home_directory):
-        path = temp_directory.name + "/" + path
-        temp_directory = temp_directory.parent_directory
-    path = "/" + path
+    path = getPath(request, notefile.directory) + notefile.name + "/"
 
     return render(request, 'srs/notefile_detail.html', {'notefile': notefile, 'path': path})
 
@@ -124,12 +119,7 @@ def notefile_new(request, pk):
     home_directory = Directory.objects.filter(author=request.user).get(parent_directory__isnull = True)
 
     # calculate path
-    temp_directory = parent
-    path = ""
-    while(temp_directory != home_directory):
-        path = temp_directory.name + "/" + path
-        temp_directory = temp_directory.parent_directory
-    path = "/" + path
+    path = getPath(request, parent)
 
     if parent==home_directory:
         parent_is_home = True
@@ -163,15 +153,9 @@ def get_notefile(request):
 
 def notecard_list(request, pk):
     notefile_Name = Notefile.objects.get(pk=pk)
-    home_directory = Directory.objects.filter(author=request.user).get(parent_directory__isnull = True)
 
     # calculate path
-    temp_directory = notefile_Name.directory
-    path = notefile_Name.name + "/"
-    while(temp_directory != home_directory):
-        path = temp_directory.name + "/" + path
-        temp_directory = temp_directory.parent_directory
-    path = "/" + path
+    path = getPath(request, notefile_Name.directory) + notefile_Name.name + "/"
 
     notecards = Notecard.objects.filter(notefile=notefile_Name)
     queryset = serializers.serialize('json', notecards)
@@ -191,16 +175,10 @@ def notecard_list(request, pk):
 
 def notecard_detail(request, pk):
     notecard = get_object_or_404(Notecard, pk=pk)
-    home_directory = Directory.objects.filter(author=request.user).get(parent_directory__isnull = True)
 
     # calculate path
     notefile_Name = notecard.notefile
-    temp_directory = notefile_Name.directory
-    path = notefile_Name.name + "/"
-    while(temp_directory != home_directory):
-        path = temp_directory.name + "/" + path
-        temp_directory = temp_directory.parent_directory
-    path = "/" + path
+    path = getPath(request, notefile_Name.directory) + notefile_Name.name + "/"
 
     return render(request, 'srs/notecard_detail.html', {'notecard': notecard, 'pk': notecard.notefile.pk, 'path': path})
 
@@ -216,13 +194,7 @@ def import_notecard(request, pk):
 
     # calculate path
     notefile_Name = Notefile.objects.get(pk=pk)
-    home_directory = Directory.objects.filter(author=request.user).get(parent_directory__isnull = True)
-    temp_directory = notefile_Name.directory
-    path = notefile_Name.name + "/"
-    while(temp_directory != home_directory):
-        path = temp_directory.name + "/" + path
-        temp_directory = temp_directory.parent_directory
-    path = "/" + path
+    path = getPath(request, notefile_Name.directory) + notefile_Name.name + "/"
 
     if request.method == 'POST':
         form = ImportForm(request.POST)
@@ -362,13 +334,7 @@ def createNotecard(request, keywords, header, body, notefilePK):
 def export_notecard(request, pk):
     # calculate path
     notefile_Name = Notefile.objects.get(pk=pk)
-    home_directory = Directory.objects.filter(author=request.user).get(parent_directory__isnull = True)
-    temp_directory = notefile_Name.directory
-    path = notefile_Name.name + "/"
-    while(temp_directory != home_directory):
-        path = temp_directory.name + "/" + path
-        temp_directory = temp_directory.parent_directory
-    path = "/" + path
+    path = getPath(request, notefile_Name.directory) + notefile_Name.name + "/"
 
     if request.method == 'POST':
         form = ImportForm(request.POST)
