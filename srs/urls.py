@@ -1,6 +1,8 @@
 from django.conf.urls import url
 from django.contrib import admin
 from srs import views
+from django.conf.urls.static import static
+from django.conf import settings
 
 urlpatterns = [
     url(r'^$', views.welcome_text, name='welcome'),
@@ -20,7 +22,9 @@ urlpatterns = [
 	url(r'^srs/create_directory/(?P<pk>\d+)/$', views.create_directory, name='create_directory'),
 	url(r'^srs/directory_list/(?P<pk>\d+)/$', views.directory_content, name='directory_content'),
 	url(r'^srs/create_video/(?P<pk>\d+)/$', views.create_video, name='create_video'),
+	url(r'^srs/create_audio/(?P<pk>\d+)/$', views.create_audio, name='create_audio'),
 	url(r'^admin/', admin.site.urls, name='login_redirect'),
 	url(r'^logout/$', views.logout_view, name='logout'),
-	url(r'^srs/video_list/$', views.video_list, name='video_list'),
-]
+	url(r'^srs/video_archive/$', views.video_list, name='video_list'),
+	url(r'^srs/audio_archive/$', views.audio_list, name='audio_list'),
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

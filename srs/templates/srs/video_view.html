@@ -7,13 +7,44 @@
 
 {% block content %}
     {% for video in videos %}
-        <div >
+<!--         <div >
             <span><font color="white">{{ video.url }}</font></span>
             <br />
             <iframe src='{{ video.url }}' class="video_link" frameborder="0" allowfullscreen></iframe>
             <br />
             <br />
             <br />
+        </div> -->
+        <div class="video_container">
+            <p class="vid_info">{{video.title}}</p>
+            <a class="video_select" data-path="/media/{{video.video}}" title="{{video.title}}" data-source="{{video.url}}"><img src="/media/{{video.thumbnail}}" width="190px" height="140px"></a>
         </div>
     {% endfor %}
+
+    <!-- Video Modal -->
+    <div id="vidmodal" class="modal video-modal" role="dialog">
+        <div class="modal-dialog">
+
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button id="vid_close" class="close_btn btn">Close</button>
+                    <h2>Video Player</h2>
+                </div>
+                <div class="modal-body">
+                    <h3 id="vidtitle">Title</h3>
+                    <h3 id="vidsource">Source: </h3>
+
+                    <video id="video" controls>
+                        <source id="video_box" src="" type="video/mp4"></source>
+                    </video>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    <div class="backdrop"></div>
+
+    <script type="text/javascript" src="{% static 'js/loadVideo.js' %}"></script>
 {% endblock %}

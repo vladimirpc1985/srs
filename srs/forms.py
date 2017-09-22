@@ -1,5 +1,5 @@
 from django import forms
-from srs.models import Notefile, Directory, Video
+from srs.models import Notefile, Directory, Video, Audio
 
 class ImportForm(forms.Form):
     path = forms.CharField(label='Path', max_length=100)
@@ -17,4 +17,9 @@ class DirectoryForm(forms.ModelForm):
 class VideoForm(forms.ModelForm):
     class Meta:
         model = Video
-        fields = ('url',)
+        fields = ('url','title',)
+
+class AudioForm(forms.ModelForm):
+    class Meta:
+        model = Audio
+        fields = ('url','title',)
