@@ -4,9 +4,11 @@ from django.contrib.auth import logout
 from django.core.files import File
 from django.contrib import messages
 from django.contrib.auth.models import User
-from srs.models import Directory, Notefile, Notecard, Video
-from srs.forms import NotefileForm, DirectoryForm, ImportForm, VideoForm
+from srs.models import Directory, Notefile, Notecard, Video, Audio
+from srs.forms import NotefileForm, DirectoryForm, ImportForm, VideoForm, AudioForm
 from django.core import serializers
+from pathlib import Path
+import os.path
 import json
 
 def logout_view(request):
@@ -61,6 +63,10 @@ def selection_view(request):
 def video_list(request):
     videos = Video.objects.filter(created_date__lte=timezone.now())
     return render(request, 'srs/video_view.html', {'videos': videos})
+
+def audio_list(request):
+    audios = Audio.objects.filter(created_date__lte=timezone.now())
+    return render(request, 'srs/audio_view.html', {'audios': audios})
 
 def create_directory(request, pk):
     duplicate = False
@@ -218,11 +224,10 @@ def notecard_detail(request, pk):
     path = getPath(request, notefile_Name.directory) + notefile_Name.name + "/"
 
     # Get the list of videos associated with this notecard.
-    videos = Video.objects.filter(notecard__name=notecard.name)
-    print("Number of videos is ")
-    print(videos.count())
+    videos = Video.objects.filter(notecard=notecard)
+    audios = Audio.objects.filter(notecard=notecard)
 
-    return render(request, 'srs/notecard_detail.html', {'notecard': notecard, 'pk': notecard.notefile.pk, 'path': path, 'videos': videos })
+    return render(request, 'srs/notecard_detail.html', {'notecard': notecard, 'pk': notecard.notefile.pk, 'path': path, 'videos': videos, 'audios': audios })
 
 
 def create_video(request, pk):
@@ -234,11 +239,55 @@ def create_video(request, pk):
             video.author = request.user
             video.created_date = timezone.now()
             video.notecard = parentNotecard
+
+            my_vid = Path(video.url)
+            # video is a file on computer
+            if(my_vid.is_file()):
+                with open(video.url, 'rb') as vid_file:
+                    extension = os.path.splitext(video.url)[1]
+                    video.video.save(video.title + extension, File(vid_file), save=True)
+            # video is from internet or has a bad path
+            else:
+                # TODO add code here to check if url is valid video (if not then show error), then download and save video
+                print("Internet path")
+
+
+            # TODO generate thumbnail for video
+
+
             video.save()
-            return redirect('home_directory')
+            return redirect('notecard_detail', pk=pk)
     else:
         form = VideoForm()
     return render(request, 'srs/create_video.html', {'form': form, 'pk':pk})
+
+
+def create_audio(request, pk):
+    parentNotecard = get_object_or_404(Notecard, pk=pk)
+    if(request.method == "POST"):
+        form = AudioForm(request.POST)
+        if form.is_valid():
+            audio = form.save(commit=False)
+            audio.author = request.user
+            audio.created_date = timezone.now()
+            audio.notecard = parentNotecard
+
+            my_audio = Path(audio.url)
+            # audio is a file on computer
+            if(my_audio.is_file()):
+                with open(audio.url, 'rb') as audio_file:
+                    extension = os.path.splitext(audio.url)[1]
+                    audio.audio.save(audio.title + extension, File(audio_file), save=True)
+            # audio is from internet or has a bad path
+            else:
+                # TODO add code here to check if url is valid audio (if not then show error), then download and save audio
+                print("Internet path")
+
+            audio.save()
+            return redirect('notecard_detail', pk=pk)
+    else:
+        form = AudioForm()
+    return render(request, 'srs/create_audio.html', {'form': form, 'pk':pk})
 
 
 def about(request):

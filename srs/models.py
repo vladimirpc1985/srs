@@ -69,7 +69,26 @@ class Notecard(models.Model):
 
 class Video(models.Model):
     author = models.ForeignKey('auth.User')
+    title = models.CharField(max_length=100)
     url = models.CharField(max_length=200)
+    video = models.FileField(upload_to='videos/%Y/%m/%d/')
+    thumbnail = models.ImageField(upload_to='thumbnails/%Y/%m/%d/')
+    notecard = models.ForeignKey(Notecard, null=True, on_delete=models.CASCADE)
+    created_date = models.DateTimeField(
+            default=timezone.now)
+
+    def create(self):
+        self.created_date = timezone.now()
+        self.save()
+
+    def __str__(self):
+        return self.url
+
+class Audio(models.Model):
+    author = models.ForeignKey('auth.User')
+    title = models.CharField(max_length=100)
+    url = models.CharField(max_length=200)
+    audio = models.FileField(upload_to='audio/%Y/%m/%d/')
     notecard = models.ForeignKey(Notecard, null=True, on_delete=models.CASCADE)
     created_date = models.DateTimeField(
             default=timezone.now)

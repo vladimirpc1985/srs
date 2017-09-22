@@ -5,8 +5,8 @@
 {% endblock %}
 
 {% block content %}
-    <h2>Add video</h2>
-    <p>Enter the file path or URL for the video you want to add.</p>
+    <h2>Add audio</h2>
+    <p>Enter the file path or URL for the audio you want to add.</p>
     <form method="POST" class="post-form">{% csrf_token %}
         {{ form.as_p }}
         <button type="submit" class="save btn btn-default">Save</button>

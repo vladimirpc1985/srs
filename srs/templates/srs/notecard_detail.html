@@ -2,16 +2,13 @@
 
 {% block site_content %}
     <a href="{% url 'selection_view' %}"><h2>Return to View Select</h2></a>
+    <a href="{% url 'create_video' pk=notecard.pk %}" class="top-menu"><h2>Add Video &nbsp;&nbsp;<i class="fa fa-video-camera"></i></h2></a>
+    <a href="{% url 'create_audio' pk=notecard.pk %}" class="top-menu"><h2>Add Audio &nbsp;&nbsp;<i class="fa fa-music"></i></h2></a>
     <a href="{% url 'notecard_list' pk=pk %}"><h2>Back</h2></a>
     <a ><h2>Help</h2></a>
 {% endblock %}
 
 {% block content %}
-    <div>
-        <a href="{% url 'create_video' pk=notecard.pk %}" class="top-menu" style="font-size:24px; float: right;" ><i class="fa fa-youtube-square"></i></a>
-        <!--TODO: Add audio functionality-->
-        <a href="{% url 'create_video' pk=notecard.pk %}" class="top-menu" style="font-size:24px; float: right;" ><i class="fa fa-play-circle-o"></i></a>
-    </div>
     <div class="notecard">
         <h2>Title:</h2>
         <p>{{ notecard.name }}</p>
@@ -21,14 +18,82 @@
         <p>{{ notecard.body }}</p>
         <h2>Videos:</h2>
         {% for video in videos %}
-            <div >
-                <span><font color="white">{{ video.url }}</span>
+    <!--         <div >
+                <span><font color="white">{{ video.url }}</font></span>
+                <br />
                 <iframe src='{{ video.url }}' class="video_link" frameborder="0" allowfullscreen></iframe>
                 <br />
                 <br />
                 <br />
+            </div> -->
+            <div class="video_container">
+                <p class="vid_info">{{video.title}}</p>
+                <a class="video_select" data-path="/media/{{video.video}}" title="{{video.title}}" data-source="{{video.url}}"><img src="/media/{{video.thumbnail}}" width="190px" height="140px"></a>
             </div>
         {% endfor %}
+
+        <h2>Audio:</h2>
+        {% for audio in audios %}
+            <a class="audio_select" data-path="/media/{{audio.audio}}" title="{{audio.title}}" data-source="{{audio.url}}">
+                <div class="notefile-listing">
+                    <span>&nbsp;<i class="fa fa-play-circle"></i> &nbsp;{{audio.title}}</span>
+                </div>
+            </a>
+        {% endfor %}
+
+        <!-- Video Modal -->
+        <div id="vidmodal" class="modal video-modal" role="dialog">
+            <div class="modal-dialog">
+
+                <!-- Modal content-->
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button id="vid_close" class="close_btn btn">Close</button>
+                        <h2>Video Player</h2>
+                    </div>
+                    <div class="modal-body">
+                        <h3 id="vidtitle">Title</h3>
+                        <h3 id="vidsource">Source: </h3>
+
+                        <video id="video" controls>
+                            <source id="video_box" src="" type="video/mp4"></source>
+                        </video>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+
+        <!-- Audio Modal -->
+        <div id="audiomodal" class="modal audio-modal" role="dialog">
+            <div class="modal-dialog">
+
+                <!-- Modal content-->
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button id="audio_close" class="close_btn btn">Close</button>
+                        <h2>Audio Player</h2>
+                    </div>
+                    <div class="modal-body">
+                        <h3 id="audiotitle">Title</h3>
+                        <h3 id="audiosource">Source: </h3>
+
+                        <div id="waveform"></div>
+                        <div class="text-center">
+                            <button id="play_btn" class="btn">Play <i class="fa fa-play"></i></button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="backdrop"></div>
     </div>
+
+    {% load static %}
+    <script src="//cdnjs.cloudflare.com/ajax/libs/wavesurfer.js/1.4.0/wavesurfer.min.js"></script>
+    <script type="text/javascript" src="{% static 'js/loadAudio.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/loadVideo.js' %}"></script>
 
 {% endblock %}
