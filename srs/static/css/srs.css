@@ -777,10 +777,15 @@ input{
   border-bottom-right-radius: 15px;
 }
 
-.modal-header h2{
+.audio-modal-title{
   display: inline-block;
   font-size: 25px;
   padding-left: 140px;
+}
+.video-modal-title{
+  display: inline-block;
+  font-size: 25px;
+  padding-left: 190px;
 }
 
 #vidtitle, #audiotitle{
