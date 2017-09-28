@@ -76,44 +76,6 @@ def create_directory(request, pk):
     # calculate path
     path = getPath(request, parent)
 
-    if parent==home_directory:
-        parent_is_home = True
-    else:
-        parent_is_home = False
-
-    if request.method == "POST":
-        form = NotefileForm(request.POST)
-        if form.is_valid():
-            if Notefile.objects.filter(directory=parent).filter(name=form.cleaned_data.get('name')).exists():
-                duplicate = True;
-            else:
-                notefile = form.save(commit=False)
-                notefile.author = request.user
-                notefile.created_date = timezone.now()
-                notefile.directory = parent
-                notefile.save()
-                if parent_is_home:
-                    return redirect('home_directory')
-                else:
-                    return redirect('directory_content', pk=pk)
-    else:
-        form = NotefileForm()
-    return render(request, 'srs/create_notefile.html', {'form': form, 'parent_is_home': parent_is_home, 'pk': pk, 'duplicate': duplicate, 'path': path})
-
-
-def ftory(request, pk):
-    duplicate = False
-    parent = get_object_or_404(Directory, pk=pk)
-    home_directory = Directory.objects.filter(author=request.user).get(parent_directory__isnull = True)
-
-    # calculate path
-    temp_directory = parent
-    path = ""
-    while(temp_directory != home_directory):
-        path = temp_directory.name + "/" + path
-        temp_directory = temp_directory.parent_directory
-    path = "/" + path
-
     if request.method == "POST":
         form = DirectoryForm(request.POST)
         if form.is_valid():
