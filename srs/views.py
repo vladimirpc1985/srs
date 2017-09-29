@@ -372,33 +372,11 @@ def checkFileFormat(request, lines, notefilePK):
     except ValueError as err:
         print(err.args)
 
-
+#TODO: Why does the new lines get removed from the strings in the DB?
 def create_notecard(request, keywords, header, body, notefilePK):
-    bin_keywords = keywords.replace(b'\x8d',b'')
-    str_keywords = bin_keywords.decode('ascii','ignore')
-    bin_header = header.replace(b'\x8d',b'')
-    str_header = bin_header.decode('ascii','ignore')
-    bin_body = body.replace(b'\x8d',b'')
-    str_body = bin_body.decode('ascii', 'ignore')
-    if str_keywords != '' or str_header != '' or str_body != '':
-        try:
-            notefile_name = Notefile.objects.get(pk=notefilePK)
-            if request.user.is_authenticated():
-                user = User.objects.get(username=request.user.username)
-                Notecard.objects.create(author=user,name=str_header, keywords=str_keywords, body = str_body, notefile = notefile_name)
-            else:
-                messages.info(request, 'You need to log in before using SRS import feature.')
-        except ValueError as err:
-            print(err.args)
-
-
-def createNotecard(request, keywords, header, body, notefilePK):
-    bin_keywords = keywords.replace(b'\x8d',b'')
-    str_keywords = bin_keywords.decode('ascii')
-    bin_header = header.replace(b'\x8d',b'')
-    str_header = bin_header.decode('ascii')
-    bin_body = body.replace(b'\x8d',b'')
-    str_body = bin_body.decode('ascii')
+    str_keywords = keywords.decode('ascii', 'ignore')
+    str_header = header.decode('ascii', 'ignore')
+    str_body = body.decode('ascii', 'ignore')
     if str_keywords != '' or str_header != '' or str_body != '':
         try:
             notefile_name = Notefile.objects.get(pk=notefilePK)
