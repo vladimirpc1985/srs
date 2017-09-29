@@ -260,7 +260,6 @@ def contact(request):
     return render(request, 'srs/contact.html')
 
 def import_notecard(request, pk):
-
     # calculate path
     notefile_Name = Notefile.objects.get(pk=pk)
     path = getPath(request, notefile_Name.directory) + notefile_Name.name + "/"
@@ -273,10 +272,8 @@ def import_notecard(request, pk):
             path = cd.get('path')
             #To check if a notecard was created.
             notecards = Notecard.objects.filter(notefile=notefile_Name)
-            print(notecards.count())
             notecards_count_before = notecards.count()
             try:
-                #TODO check if replacing name with pk broke this
                 readFile(request, path, pk)
                 notecards_count_after = notecards.count()
                 if notecards_count_after > notecards_count_before:
@@ -321,12 +318,10 @@ def readContent(request, file, notefilePK):
         line = line.replace(b'\n', b'')
         lines.append(line)
     #check if file is correct and create notecard if it's correct.
-    print("About to check format")
-    checkFileFormat(request, lines, notefilePk)
+    checkFileFormat(request, lines, notefilePK)
 
 
 def checkFileFormat(request, lines, notefilePK):
-    print("checkingFormat")
     #Check whether the length of the file is greater than 5 (at least 5 delimiters)
     length = len(lines)
     if length < 5:
@@ -340,14 +335,12 @@ def checkFileFormat(request, lines, notefilePK):
 
         length = len(lines)
         current_line = header_index+1
-
         while(current_line < length):
             #Get indexes for delimiters
             keyword_start_index = lines.index(b'*', current_line)
             header_start_index = lines.index(b'!', current_line)
             header_end_index = lines.index(b'$', current_line)
             body_end_index = lines.index(b'#', current_line)
-
             #Check for errors
             if header_index >= keyword_start_index:
                 raise ValueError('Header has to be placed before keyword-start delimiter.')
@@ -373,11 +366,30 @@ def checkFileFormat(request, lines, notefilePK):
             for i in range(length)[header_end_index+1:body_end_index]:
                 body += lines[i] + b'\r\n'
             #If everything's ok, then we create the notecard
-            createNotecard(request, keywords, header, body, notefilePK)
+            create_notecard(request, keywords, header, body, notefilePK)
             #Update current_line so we can get the data from the next notecard.
             current_line = body_end_index+1
     except ValueError as err:
         print(err.args)
+
+
+def create_notecard(request, keywords, header, body, notefilePK):
+    bin_keywords = keywords.replace(b'\x8d',b'')
+    str_keywords = bin_keywords.decode('ascii','ignore')
+    bin_header = header.replace(b'\x8d',b'')
+    str_header = bin_header.decode('ascii','ignore')
+    bin_body = body.replace(b'\x8d',b'')
+    str_body = bin_body.decode('ascii', 'ignore')
+    if str_keywords != '' or str_header != '' or str_body != '':
+        try:
+            notefile_name = Notefile.objects.get(pk=notefilePK)
+            if request.user.is_authenticated():
+                user = User.objects.get(username=request.user.username)
+                Notecard.objects.create(author=user,name=str_header, keywords=str_keywords, body = str_body, notefile = notefile_name)
+            else:
+                messages.info(request, 'You need to log in before using SRS import feature.')
+        except ValueError as err:
+            print(err.args)
 
 
 def createNotecard(request, keywords, header, body, notefilePK):
