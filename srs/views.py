@@ -1,3 +1,4 @@
+import re
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
 from django.contrib.auth import logout
@@ -8,6 +9,10 @@ from srs.models import Directory, Notefile, Notecard, Video, Audio
 from srs.forms import NotefileForm, DirectoryForm, ImportForm, VideoForm, AudioForm
 from django.core import serializers
 from pathlib import Path
+from thumbnails import get_thumbnail
+#from urllib2 import urlopen
+#import mimetypes
+import urllib
 import os.path
 import json
 
@@ -211,17 +216,33 @@ def create_video(request, pk):
             # video is from internet or has a bad path
             else:
                 # TODO add code here to check if url is valid video (if not then show error), then download and save video
-                print("Internet path")
-
+                validation = youtube_url_validation(video.url)
+                if(validation == 'valid'):
+                    print('URL is valid')
+                else:
+                    print('URL is invalid')
 
             # TODO generate thumbnail for video
-
+            #video.thumbnail = get_thumbnail(video.url, '300x300', crop='center')
 
             video.save()
             return redirect('notecard_detail', pk=pk)
     else:
         form = VideoForm()
     return render(request, 'srs/create_video.html', {'form': form, 'pk':pk})
+
+
+def youtube_url_validation(url):
+    youtube_regex = (
+        r'(https?://)?(www\.)?'
+        '(youtube|youtu|youtube-nocookie)\.(com|be)/'
+        '(watch\?v=|embed/|v/|.+\?v=)?([^&=%\?]{11})')
+
+    youtube_regex_match = re.match(youtube_regex, url)
+    if youtube_regex_match:
+        return 'valid'
+
+    return 'invalid'
 
 
 def create_audio(request, pk):
