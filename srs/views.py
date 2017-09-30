@@ -191,6 +191,7 @@ def notecard_detail(request, pk):
     # calculate path
     notefile_Name = notecard.notefile
     path = getPath(request, notefile_Name.directory) + notefile_Name.name + "/"
+    path += notecard.name;
 
     # Get the list of videos associated with this notecard.
     videos = Video.objects.filter(notecard=notecard)
@@ -202,6 +203,12 @@ def notecard_detail(request, pk):
 
 def create_video(request, pk):
     parentNotecard = get_object_or_404(Notecard, pk=pk)
+
+    # calculate path
+    notefile_Name = parentNotecard.notefile
+    path = getPath(request, notefile_Name.directory) + notefile_Name.name + "/"
+    path += parentNotecard.name;
+
     if(request.method == "POST"):
         form = VideoForm(request.POST)
         if form.is_valid():
@@ -229,11 +236,17 @@ def create_video(request, pk):
             return redirect('notecard_detail', pk=pk)
     else:
         form = VideoForm()
-    return render(request, 'srs/create_video.html', {'form': form, 'pk':pk})
+    return render(request, 'srs/create_video.html', {'form': form, 'pk':pk, 'path':path})
 
 
 def create_audio(request, pk):
     parentNotecard = get_object_or_404(Notecard, pk=pk)
+
+    # calculate path
+    notefile_Name = parentNotecard.notefile
+    path = getPath(request, notefile_Name.directory) + notefile_Name.name + "/"
+    path += parentNotecard.name;
+
     if(request.method == "POST"):
         form = AudioForm(request.POST)
         if form.is_valid():
@@ -257,13 +270,19 @@ def create_audio(request, pk):
             return redirect('notecard_detail', pk=pk)
     else:
         form = AudioForm()
-    return render(request, 'srs/create_audio.html', {'form': form, 'pk':pk})
+    return render(request, 'srs/create_audio.html', {'form': form, 'pk':pk, 'path':path})
 
 
 def create_document(request, pk):
     badType = False;
     badFile = False;
     parentNotecard = get_object_or_404(Notecard, pk=pk)
+
+    # calculate path
+    notefile_Name = parentNotecard.notefile
+    path = getPath(request, notefile_Name.directory) + notefile_Name.name + "/"
+    path += parentNotecard.name;
+
     if(request.method == "POST"):
         form = DocumentForm(request.POST, request.FILES)
         if form.is_valid():
@@ -291,7 +310,7 @@ def create_document(request, pk):
                 badFile = True;
     else:
         form = DocumentForm()
-    return render(request, 'srs/create_document.html', {'form': form, 'pk':pk, "badFile": badFile, "badType": badType})
+    return render(request, 'srs/create_document.html', {'form': form, 'pk':pk, 'badFile': badFile, 'badType': badType, 'path':path})
 
 
 def about(request):
