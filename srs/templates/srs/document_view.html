@@ -1,0 +1,16 @@
+{% extends 'srs/base_srs.html' %}
+{% load staticfiles %}
+
+{% block site_content %}
+    <a href="{% url 'selection_view' %}" ><h2>Return to View Select</h2></a>
+{% endblock %}
+
+{% block content %}
+
+    {% for document in documents %}
+        <p>
+          <a class="document_link" href="/media/{{document.document}}" title="{{document.name}}">{{document.name}}</a>
+        </p>
+    {% endfor %}
+
+{% endblock %}

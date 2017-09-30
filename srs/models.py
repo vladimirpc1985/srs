@@ -2,6 +2,7 @@ from django.db import models
 from django.utils import timezone
 from django.db.models.signals import post_save
 from django.contrib.auth.models import User
+import os.path
 
 def create_folder(sender, instance, created, **kwargs):
     if not created:  # if it's not a new object return
@@ -48,7 +49,7 @@ class Notefile(models.Model):
     def __str__(self):
         return self.name
 
-        return 
+        return
 
 class Notecard(models.Model):
     author = models.ForeignKey('auth.User')
@@ -82,7 +83,7 @@ class Video(models.Model):
         self.save()
 
     def __str__(self):
-        return self.url
+        return self.title
 
 class Audio(models.Model):
     author = models.ForeignKey('auth.User')
@@ -98,4 +99,20 @@ class Audio(models.Model):
         self.save()
 
     def __str__(self):
-        return self.url
+        return self.title
+
+class Document(models.Model):
+    author = models.ForeignKey('auth.User')
+    source = models.CharField(max_length=200)
+    name = models.CharField(max_length=100)
+    document = models.FileField(upload_to='documents/%Y/%m/%d/')
+    notecard = models.ForeignKey(Notecard, null=True, on_delete=models.CASCADE)
+    created_date = models.DateTimeField(
+            default=timezone.now)
+
+    def create(self):
+        self.created_date = timezone.now()
+        self.save()
+
+    def __str__(self):
+        return self.name

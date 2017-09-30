@@ -1,0 +1,20 @@
+{% extends 'srs/base.html' %}
+{% load staticfiles %}
+
+{% block site_content %}
+{% endblock %}
+
+{% block content %}
+    <h2>Add Document</h2>
+    <form method="POST" class="post-form" enctype="multipart/form-data">{% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="save btn btn-default">Save</button>
+        <a href="{% url 'notecard_detail' pk=pk %}" class="cancel btn btn-default">Cancel</a>
+        {% if badFile %}
+            <p class="error">Error: There is no file at that location!</p>
+        {% endif %}
+        {% if badType %}
+            <p class="error">Error: The file must be a document, pdf, powerpoint, or excel sheet!</p>
+        {% endif %}
+    </form>
+{% endblock %}

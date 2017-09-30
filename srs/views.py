@@ -4,8 +4,8 @@ from django.contrib.auth import logout
 from django.core.files import File
 from django.contrib import messages
 from django.contrib.auth.models import User
-from srs.models import Directory, Notefile, Notecard, Video, Audio
-from srs.forms import NotefileForm, DirectoryForm, ImportForm, VideoForm, AudioForm
+from srs.models import Directory, Notefile, Notecard, Video, Audio, Document
+from srs.forms import NotefileForm, DirectoryForm, ImportForm, VideoForm, AudioForm, DocumentForm
 from django.core import serializers
 from pathlib import Path
 import os.path
@@ -64,9 +64,16 @@ def video_list(request):
     videos = Video.objects.filter(created_date__lte=timezone.now())
     return render(request, 'srs/video_view.html', {'videos': videos})
 
+
 def audio_list(request):
     audios = Audio.objects.filter(created_date__lte=timezone.now())
     return render(request, 'srs/audio_view.html', {'audios': audios})
+
+
+def document_list(request):
+    documents = Document.objects.filter(created_date__lte=timezone.now())
+    return render(request, 'srs/document_view.html', {'documents': documents})
+
 
 def create_directory(request, pk):
     duplicate = False
@@ -188,8 +195,9 @@ def notecard_detail(request, pk):
     # Get the list of videos associated with this notecard.
     videos = Video.objects.filter(notecard=notecard)
     audios = Audio.objects.filter(notecard=notecard)
+    documents = Document.objects.filter(notecard=notecard)
 
-    return render(request, 'srs/notecard_detail.html', {'notecard': notecard, 'pk': notecard.notefile.pk, 'path': path, 'videos': videos, 'audios': audios })
+    return render(request, 'srs/notecard_detail.html', {'notecard': notecard, 'pk': notecard.notefile.pk, 'path': path, 'videos': videos, 'audios': audios, 'documents': documents})
 
 
 def create_video(request, pk):
@@ -250,6 +258,40 @@ def create_audio(request, pk):
     else:
         form = AudioForm()
     return render(request, 'srs/create_audio.html', {'form': form, 'pk':pk})
+
+
+def create_document(request, pk):
+    badType = False;
+    badFile = False;
+    parentNotecard = get_object_or_404(Notecard, pk=pk)
+    if(request.method == "POST"):
+        form = DocumentForm(request.POST, request.FILES)
+        if form.is_valid():
+            document = form.save(commit=False)
+            document.author = request.user
+            document.created_date = timezone.now()
+            document.notecard = parentNotecard
+
+            my_doc = Path(document.source)
+            # If there location contains a file
+            if(my_doc.is_file()):
+                with open(document.source, 'rb') as document_file:
+                    extension = os.path.splitext(document.source)[1]
+                    print(extension)
+                    if extension in (".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx", ".pps", ".ppsx"):
+                        document.name = os.path.basename(document.source)
+                        document.document.save(document.name, File(document_file), save=True)
+                        document.save()
+                        return redirect('notecard_detail', pk=pk)
+                    # The file type is not allowed
+                    else:
+                        badType = True;
+            # There is not a file at that location
+            else:
+                badFile = True;
+    else:
+        form = DocumentForm()
+    return render(request, 'srs/create_document.html', {'form': form, 'pk':pk, "badFile": badFile, "badType": badType})
 
 
 def about(request):

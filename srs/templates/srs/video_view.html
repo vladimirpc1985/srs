@@ -7,14 +7,6 @@
 
 {% block content %}
     {% for video in videos %}
-<!--         <div >
-            <span><font color="white">{{ video.url }}</font></span>
-            <br />
-            <iframe src='{{ video.url }}' class="video_link" frameborder="0" allowfullscreen></iframe>
-            <br />
-            <br />
-            <br />
-        </div> -->
         <div class="video_container">
             <p class="vid_info">{{video.title}}</p>
             <a class="video_select" data-path="/media/{{video.video}}" title="{{video.title}}" data-source="{{video.url}}"><img src="/media/{{video.thumbnail}}" width="190px" height="140px"></a>
@@ -40,7 +32,7 @@
                     </video>
                 </div>
             </div>
-            
+
         </div>
     </div>
 
