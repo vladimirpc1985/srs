@@ -2,19 +2,20 @@
 
 {% block content %}
 	<h2>Create Directory</h2>
-    <p>Enter the name for the directory you want to create</p>
-    <form method="POST" class="notefile-form">{% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit" class="save btn btn-default">Save</button>
-        {% if parent.parent_directory == None %}
-            <a href="{% url 'home_directory' %}" class="cancel btn btn-default">Cancel</a>
-        {% else %}
-            <a href="{% url 'directory_content' pk=parent.pk %}" class="cancel btn btn-default">Cancel</a>
-        {% endif %}
-        {% if duplicate %}
-            <p class="error">Error: A directory with that name already exists in the current directory!</p>
-        {% endif %}
-    </form>
+  <p>Enter the name for the directory you want to create</p>
+
+	<form method="POST" class="notefile-form">{% csrf_token %}
+      {{ form.as_p }}
+      <button type="submit" class="save btn btn-default">Save</button>
+      {% if parent.parent_directory == None %}
+          <a href="{% url 'home_directory' %}" class="cancel btn btn-default">Cancel</a>
+      {% else %}
+          <a href="{% url 'directory_content' pk=parent.pk %}" class="cancel btn btn-default">Cancel</a>
+      {% endif %}
+      {% if duplicate %}
+          <p class="error">Error: A directory with that name already exists in the current directory!</p>
+      {% endif %}
+  </form>
 
 
 {% endblock %}

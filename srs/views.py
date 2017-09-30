@@ -5,7 +5,7 @@ from django.core.files import File
 from django.contrib import messages
 from django.contrib.auth.models import User
 from srs.models import Directory, Notefile, Notecard, Video, Audio, Document
-from srs.forms import NotefileForm, DirectoryForm, ImportForm, VideoForm, AudioForm, DocumentForm
+from srs.forms import NotefileForm, DirectoryForm, ImportForm, VideoForm, AudioForm, DocumentForm, NotecardForm
 from django.core import serializers
 from pathlib import Path
 import os.path
@@ -103,6 +103,27 @@ def create_directory(request, pk):
     return render(request, 'srs/create_directory.html', {'form': form, 'parent': parent, 'duplicate': duplicate, 'path': path})
 
 
+def create_notecard(request, pk):
+    parentNotefile = get_object_or_404(Notefile, pk=pk)
+    home_directory = Directory.objects.filter(author=request.user).get(parent_directory__isnull = True)
+
+    # calculate path
+    path = getPath(request, parentNotefile.directory) + parentNotefile.name + "/"
+
+    if request.method == "POST":
+        form = NotecardForm(request.POST)
+        if form.is_valid():
+            notecard = form.save(commit=False)
+            notecard.author = request.user
+            notecard.created_date = timezone.now()
+            notecard.notefile = parentNotefile
+            notecard.save()
+            return redirect('notecard_list', pk=pk)
+    else:
+        form = NotecardForm()
+    return render(request, 'srs/create_notecard.html', {'form': form, 'path': path, "pk": pk})
+
+
 def login(request):
     return render(request, 'srs/login.html')
 
@@ -191,7 +212,10 @@ def notecard_detail(request, pk):
     # calculate path
     notefile_Name = notecard.notefile
     path = getPath(request, notefile_Name.directory) + notefile_Name.name + "/"
-    path += notecard.name;
+    if len(notecard.name) > 20:
+        path += notecard.name[:20] + "..."
+    else:
+        path += notecard.name
 
     # Get the list of videos associated with this notecard.
     videos = Video.objects.filter(notecard=notecard)
@@ -207,7 +231,10 @@ def create_video(request, pk):
     # calculate path
     notefile_Name = parentNotecard.notefile
     path = getPath(request, notefile_Name.directory) + notefile_Name.name + "/"
-    path += parentNotecard.name;
+    if len(parentNotecard.name) > 20:
+        path += parentNotecard.name[:20] + "..."
+    else:
+        path += parentNotecard.name
 
     if(request.method == "POST"):
         form = VideoForm(request.POST)
@@ -245,7 +272,10 @@ def create_audio(request, pk):
     # calculate path
     notefile_Name = parentNotecard.notefile
     path = getPath(request, notefile_Name.directory) + notefile_Name.name + "/"
-    path += parentNotecard.name;
+    if len(parentNotecard.name) > 20:
+        path += parentNotecard.name[:20] + "..."
+    else:
+        path += parentNotecard.name
 
     if(request.method == "POST"):
         form = AudioForm(request.POST)
@@ -281,7 +311,10 @@ def create_document(request, pk):
     # calculate path
     notefile_Name = parentNotecard.notefile
     path = getPath(request, notefile_Name.directory) + notefile_Name.name + "/"
-    path += parentNotecard.name;
+    if len(parentNotecard.name) > 20:
+        path += parentNotecard.name[:20] + "..."
+    else:
+        path += parentNotecard.name
 
     if(request.method == "POST"):
         form = DocumentForm(request.POST, request.FILES)

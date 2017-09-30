@@ -49,14 +49,12 @@ class Notefile(models.Model):
     def __str__(self):
         return self.name
 
-        return
-
 class Notecard(models.Model):
     author = models.ForeignKey('auth.User')
     name = models.CharField(max_length=200)
-    keywords = models.TextField(null=True)
-    label = models.TextField(null=True)
-    body = models.TextField(null=True)
+    keywords = models.TextField(blank=True, null=True)
+    label = models.TextField(blank=True, null=True)
+    body = models.TextField(blank=True, null=True)
     created_date = models.DateTimeField(
             default=timezone.now)
     notefile = models.ForeignKey(Notefile, on_delete=models.CASCADE)

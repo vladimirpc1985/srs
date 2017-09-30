@@ -1,5 +1,5 @@
 from django import forms
-from srs.models import Notefile, Directory, Video, Audio, Document
+from srs.models import Notefile, Notecard, Directory, Video, Audio, Document
 
 class ImportForm(forms.Form):
     path = forms.CharField(label='Path', max_length=100)
@@ -8,6 +8,16 @@ class NotefileForm(forms.ModelForm):
     class Meta:
         model = Notefile
         fields = ('name',)
+
+class NotecardForm(forms.ModelForm):
+
+    keywords = forms.CharField(required=False, widget=forms.Textarea, strip= False)
+    label = forms.CharField(required=False, widget=forms.Textarea, strip = False)
+    body = forms.CharField(required=False, widget=forms.Textarea, strip = False)
+
+    class Meta:
+        model = Notecard
+        fields = ('name', 'keywords', 'label', 'body',)
 
 class DirectoryForm(forms.ModelForm):
     class Meta:

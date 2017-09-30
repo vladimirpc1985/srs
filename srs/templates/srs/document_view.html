@@ -8,7 +8,7 @@
 {% block content %}
 
     {% for document in documents %}
-        <p>
+        <p class="document_link_container">
           <a class="document_link" href="/media/{{document.document}}" title="{{document.name}}">{{document.name}}</a>
         </p>
     {% endfor %}

@@ -1,21 +1,20 @@
 {% extends 'srs/base.html' %}
 
 {% block content %}
-	<h2>Create notefile</h2>
-    <p>Enter the name for the notefile you want to create</p>
-    <form method="POST" class="notefile-form">{% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit" class="save btn btn-default">Save</button>
-        {% if parent_is_home %}
-            <a href="{% url 'home_directory' %}" class="cancel btn btn-default">Cancel</a>
-        {% else %}
-            <a href="{% url 'directory_content' pk=pk %}" class="cancel btn btn-default">Cancel</a>
-        {% endif %}
-        {% if duplicate %}
-            <p class="error">Error: A notefile with that name already exists in the current directory!</p>
-        {% endif %}
-    </form>
+	<h2>Create Notefile</h2>
+  <p>Enter the name for the notefile you want to create</p>
 
-    <!-- I have to check if the new name exists and if it does, I have to show a different message asking if the person wants to retrieve the existing message. -->
+  <form method="POST" class="notefile-form">{% csrf_token %}
+      {{ form.as_p }}
+      <button type="submit" class="save btn btn-default">Save</button>
+      {% if parent_is_home %}
+          <a href="{% url 'home_directory' %}" class="cancel btn btn-default">Cancel</a>
+      {% else %}
+          <a href="{% url 'directory_content' pk=pk %}" class="cancel btn btn-default">Cancel</a>
+      {% endif %}
+      {% if duplicate %}
+          <p class="error">Error: A notefile with that name already exists in the current directory!</p>
+      {% endif %}
+  </form>
 
 {% endblock %}

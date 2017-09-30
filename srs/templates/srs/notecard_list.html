@@ -5,9 +5,9 @@
 
     <div title="search_bar"><input type="text" id="autocomplete" placeholder="Enter Keywords"></div>
     <a href="{% url 'selection_view' %}"><h2>Return to View Select</h2></a>
-    <a><h2>Edit</h2></a> 
-    <a><h2>Make</h2></a> 
-    <a><h2>Delete</h2></a> 
+    <a><h2>Edit</h2></a>
+    <a href="{% url 'create_notecard' pk=pk %}"><h2>Make</h2></a>
+    <a><h2>Delete</h2></a>
     <a><h2>Select</h2></a>
     <a><h2>Subject</h2></a>
     <a><h2>Alpha</h2></a>
@@ -74,7 +74,7 @@ var MAX_TOP = notecards.length;
     function autocomplete_search(notecards, keyword){
         BOTTOM = 5;
         sub_notecards = [];
-        for(i = 0; i < notecards.length; i++){ 
+        for(i = 0; i < notecards.length; i++){
             if(notecards[i].fields.keywords.toLowerCase().indexOf(keyword.toLowerCase()) !== -1){
                 sub_notecards.push(notecards[i]);
             }

@@ -57,7 +57,7 @@
         <li {% if request.path == "/" %} class="current" {% endif %} ><a href="{% url 'welcome' %}">Home</a></li>
         {% if user.is_authenticated %}
         <li {% if "/srs/" in request.path %} class="current" {% endif %} ><a href="{% url 'selection_view' %}">SRS</a></li>
-        {% endif %} 
+        {% endif %}
         <li {% if request.path == "/about/" %} class="current" {% endif %}><a href="{% url 'about' %}">About</a></li>
         <li {% if request.path == "/contact/" %} class="current" {% endif %}><a href="{% url 'contact' %}">Contact Us</a></li>
         {% if user.is_authenticated %}
@@ -67,21 +67,21 @@
 
         {% endif %}
       </ul>
-    </div><!--close menubar--> 
-    <div style="clear: both;"></div> 
+    </div><!--close menubar-->
+    <div style="clear: both;"></div>
 
-    <div id="site_content"> 
+    <div id="site_content">
 
       {% block sidebar_content %}
       {% endblock %}
       <div id="content">
         <div class="content_item">
             {% block content %}
-            {% endblock %}           
+            {% endblock %}
         </div><!--close content_item-->
-      </div><!--close content-->  
-    </div><!--close site_content--> 
-  
+      </div><!--close content-->
+    </div><!--close site_content-->
+
   <div id="footer">
     <p style='text-align: center;'>
         <span style='margin-bottom: 1em; display: block'>
@@ -91,7 +91,7 @@
             &copy;Copyright 2017. All rights reserved.
         </span>
     </p>
-  </div><!--close footer-->  
+  </div><!--close footer-->
   </div>
   <script>
   window.addEventListener("keydown", function(e) {
