@@ -1,3 +1,4 @@
+import re
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
 from django.contrib.auth import logout
@@ -8,6 +9,10 @@ from srs.models import Directory, Notefile, Notecard, Video, Audio, Document, Eq
 from srs.forms import NotefileForm, DirectoryForm, ImportForm, VideoForm, AudioForm, DocumentForm, NotecardForm, EquationForm
 from django.core import serializers
 from pathlib import Path
+from thumbnails import get_thumbnail
+#from urllib2 import urlopen
+#import mimetypes
+import urllib
 import os.path
 import json
 
@@ -254,17 +259,33 @@ def create_video(request, pk):
             # video is from internet or has a bad path
             else:
                 # TODO add code here to check if url is valid video (if not then show error), then download and save video
-                print("Internet path")
-
+                validation = youtube_url_validation(video.url)
+                if(validation == 'valid'):
+                    print('URL is valid')
+                else:
+                    print('URL is invalid')
 
             # TODO generate thumbnail for video
-
+            #video.thumbnail = get_thumbnail(video.url, '300x300', crop='center')
 
             video.save()
             return redirect('notecard_detail', pk=pk)
     else:
         form = VideoForm()
     return render(request, 'srs/create_video.html', {'form': form, 'pk':pk, 'path':path})
+
+
+def youtube_url_validation(url):
+    youtube_regex = (
+        r'(https?://)?(www\.)?'
+        '(youtube|youtu|youtube-nocookie)\.(com|be)/'
+        '(watch\?v=|embed/|v/|.+\?v=)?([^&=%\?]{11})')
+
+    youtube_regex_match = re.match(youtube_regex, url)
+    if youtube_regex_match:
+        return 'valid'
+
+    return 'invalid'
 
 
 def create_audio(request, pk):
@@ -381,7 +402,6 @@ def contact(request):
     return render(request, 'srs/contact.html')
 
 def import_notecard(request, pk):
-
     # calculate path
     notefile_Name = Notefile.objects.get(pk=pk)
     path = getPath(request, notefile_Name.directory) + notefile_Name.name + "/"
@@ -394,10 +414,8 @@ def import_notecard(request, pk):
             path = cd.get('path')
             #To check if a notecard was created.
             notecards = Notecard.objects.filter(notefile=notefile_Name)
-            print(notecards.count())
             notecards_count_before = notecards.count()
             try:
-                #TODO check if replacing name with pk broke this
                 readFile(request, path, pk)
                 notecards_count_after = notecards.count()
                 if notecards_count_after > notecards_count_before:
@@ -442,12 +460,10 @@ def readContent(request, file, notefilePK):
         line = line.replace(b'\n', b'')
         lines.append(line)
     #check if file is correct and create notecard if it's correct.
-    print("About to check format")
-    checkFileFormat(request, lines, notefilePk)
+    checkFileFormat(request, lines, notefilePK)
 
 
 def checkFileFormat(request, lines, notefilePK):
-    print("checkingFormat")
     #Check whether the length of the file is greater than 5 (at least 5 delimiters)
     length = len(lines)
     if length < 5:
@@ -461,14 +477,12 @@ def checkFileFormat(request, lines, notefilePK):
 
         length = len(lines)
         current_line = header_index+1
-
         while(current_line < length):
             #Get indexes for delimiters
             keyword_start_index = lines.index(b'*', current_line)
             header_start_index = lines.index(b'!', current_line)
             header_end_index = lines.index(b'$', current_line)
             body_end_index = lines.index(b'#', current_line)
-
             #Check for errors
             if header_index >= keyword_start_index:
                 raise ValueError('Header has to be placed before keyword-start delimiter.')
@@ -494,20 +508,17 @@ def checkFileFormat(request, lines, notefilePK):
             for i in range(length)[header_end_index+1:body_end_index]:
                 body += lines[i] + b'\r\n'
             #If everything's ok, then we create the notecard
-            createNotecard(request, keywords, header, body, notefilePK)
+            create_notecard(request, keywords, header, body, notefilePK)
             #Update current_line so we can get the data from the next notecard.
             current_line = body_end_index+1
     except ValueError as err:
         print(err.args)
 
-
-def createNotecard(request, keywords, header, body, notefilePK):
-    bin_keywords = keywords.replace(b'\x8d',b'')
-    str_keywords = bin_keywords.decode('ascii')
-    bin_header = header.replace(b'\x8d',b'')
-    str_header = bin_header.decode('ascii')
-    bin_body = body.replace(b'\x8d',b'')
-    str_body = bin_body.decode('ascii')
+#TODO: Why does the new lines get removed from the strings in the DB?
+def create_notecard(request, keywords, header, body, notefilePK):
+    str_keywords = keywords.decode('ascii', 'ignore')
+    str_header = header.decode('ascii', 'ignore')
+    str_body = body.decode('ascii', 'ignore')
     if str_keywords != '' or str_header != '' or str_body != '':
         try:
             notefile_name = Notefile.objects.get(pk=notefilePK)
