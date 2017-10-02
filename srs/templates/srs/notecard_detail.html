@@ -2,6 +2,7 @@
 
 {% block site_content %}
     <a href="{% url 'selection_view' %}"><h2>Return to View Select</h2></a>
+    <a href="{% url 'create_equation' pk=notecard.pk %}" class="top-menu"><h2>Add Equation</h2></a>
     <a href="{% url 'create_video' pk=notecard.pk %}" class="top-menu"><h2>Add Video &nbsp;&nbsp;<i class="fa fa-video-camera"></i></h2></a>
     <a href="{% url 'create_audio' pk=notecard.pk %}" class="top-menu"><h2>Add Audio &nbsp;&nbsp;<i class="fa fa-music"></i></h2></a>
     <a href="{% url 'create_document' pk=notecard.pk %}" class="top-menu"><h2>Add Document &nbsp;&nbsp;<i class="fa fa-file"></i></h2></a>
@@ -17,6 +18,13 @@
         <p>{{ notecard.keywords }}</p>
         <h2>Body:</h2>
         <p>{{ notecard.body }}</p>
+        {% if equations %}
+          <h2>Equations:</h2>
+          {% for equation in equations %}
+              <p class="equation-container">{{equation.equation}}</p>
+          {% endfor %}
+        {% endif %}
+
         {% if videos %}
           <h2>Videos:</h2>
           {% for video in videos %}
@@ -101,5 +109,6 @@
     <script src="//cdnjs.cloudflare.com/ajax/libs/wavesurfer.js/1.4.0/wavesurfer.min.js"></script>
     <script type="text/javascript" src="{% static 'js/loadAudio.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/loadVideo.js' %}"></script>
+    <script type="text/javascript" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-MML-AM_CHTML"></script>
 
 {% endblock %}

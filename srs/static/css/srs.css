@@ -933,3 +933,8 @@ input {
 #autocomplete:focus{
   outline: none
 }
+
+.equation-container{
+  padding: 0px;
+  font-size: 20px;
+}

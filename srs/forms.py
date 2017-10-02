@@ -1,5 +1,5 @@
 from django import forms
-from srs.models import Notefile, Notecard, Directory, Video, Audio, Document
+from srs.models import Notefile, Notecard, Directory, Video, Audio, Document, Equation
 
 class ImportForm(forms.Form):
     path = forms.CharField(label='Path', max_length=100)
@@ -51,3 +51,8 @@ class DocumentForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(DocumentForm, self).__init__(*args, **kwargs)
         self.fields['source'].label = "File Location"
+
+class EquationForm(forms.ModelForm):
+    class Meta:
+        model = Equation
+        fields = ('equation',)

@@ -1,11 +1,12 @@
 {% extends 'srs/base.html' %}
 
 {% block content %}
-	<h2>Create Notecard</h2>
-  <form method="POST">{% csrf_token %}
-      {{ form.as_p }}
-      <button type="submit" class="save btn btn-default">Save</button>
-      <a href="{% url 'notecard_list' pk=pk %}" class="cancel btn btn-default">Cancel</a>
-  </form>
+		<h2>Create Notecard</h2>
+	  <p>You can add inline equations by surrounding them with "\(" and "\)".<br>(Group terms with "{}" and call special functions using syntax like "\sqrt") </p>
+	  <form method="POST">{% csrf_token %}
+	      {{ form.as_p }}
+	      <button type="submit" class="save btn btn-default">Save</button>
+	      <a href="{% url 'notecard_list' pk=pk %}" class="cancel btn btn-default">Cancel</a>
+	  </form>
 
 {% endblock %}

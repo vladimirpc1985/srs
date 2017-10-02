@@ -114,3 +114,17 @@ class Document(models.Model):
 
     def __str__(self):
         return self.name
+
+class Equation(models.Model):
+    author = models.ForeignKey('auth.User')
+    equation = models.CharField(max_length=200)
+    notecard = models.ForeignKey(Notecard, null=True, on_delete=models.CASCADE)
+    created_date = models.DateTimeField(
+            default=timezone.now)
+
+    def create(self):
+        self.created_date = timezone.now()
+        self.save()
+
+    def __str__(self):
+        return self.equation

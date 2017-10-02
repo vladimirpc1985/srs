@@ -4,8 +4,8 @@ from django.contrib.auth import logout
 from django.core.files import File
 from django.contrib import messages
 from django.contrib.auth.models import User
-from srs.models import Directory, Notefile, Notecard, Video, Audio, Document
-from srs.forms import NotefileForm, DirectoryForm, ImportForm, VideoForm, AudioForm, DocumentForm, NotecardForm
+from srs.models import Directory, Notefile, Notecard, Video, Audio, Document, Equation
+from srs.forms import NotefileForm, DirectoryForm, ImportForm, VideoForm, AudioForm, DocumentForm, NotecardForm, EquationForm
 from django.core import serializers
 from pathlib import Path
 import os.path
@@ -217,12 +217,13 @@ def notecard_detail(request, pk):
     else:
         path += notecard.name
 
-    # Get the list of videos associated with this notecard.
+    # Get the list of objects associated with this notecard.
+    equations = Equation.objects.filter(notecard=notecard)
     videos = Video.objects.filter(notecard=notecard)
     audios = Audio.objects.filter(notecard=notecard)
     documents = Document.objects.filter(notecard=notecard)
 
-    return render(request, 'srs/notecard_detail.html', {'notecard': notecard, 'pk': notecard.notefile.pk, 'path': path, 'videos': videos, 'audios': audios, 'documents': documents})
+    return render(request, 'srs/notecard_detail.html', {'notecard': notecard, 'pk': notecard.notefile.pk, 'path': path, 'videos': videos, 'audios': audios, 'documents': documents, 'equations': equations})
 
 
 def create_video(request, pk):
@@ -344,6 +345,32 @@ def create_document(request, pk):
     else:
         form = DocumentForm()
     return render(request, 'srs/create_document.html', {'form': form, 'pk':pk, 'badFile': badFile, 'badType': badType, 'path':path})
+
+
+def create_equation(request, pk):
+    parentNotecard = get_object_or_404(Notecard, pk=pk)
+
+    # calculate path
+    notefile_Name = parentNotecard.notefile
+    path = getPath(request, notefile_Name.directory) + notefile_Name.name + "/"
+    if len(parentNotecard.name) > 20:
+        path += parentNotecard.name[:20] + "..."
+    else:
+        path += parentNotecard.name
+
+    if(request.method == "POST"):
+        form = EquationForm(request.POST)
+        if form.is_valid():
+            equation = form.save(commit=False)
+            equation.author = request.user
+            equation.created_date = timezone.now()
+            equation.notecard = parentNotecard
+            equation.equation = "$$" + equation.equation + "$$"
+            equation.save()
+            return redirect('notecard_detail', pk=pk)
+    else:
+        form = EquationForm()
+    return render(request, 'srs/create_equation.html', {'form': form, 'pk':pk, 'path':path})
 
 
 def about(request):

@@ -25,6 +25,7 @@ urlpatterns = [
 	url(r'^srs/create_video/(?P<pk>\d+)/$', views.create_video, name='create_video'),
 	url(r'^srs/create_audio/(?P<pk>\d+)/$', views.create_audio, name='create_audio'),
 	url(r'^srs/create_document/(?P<pk>\d+)/$', views.create_document, name='create_document'),
+	url(r'^srs/create_equation/(?P<pk>\d+)/$', views.create_equation, name='create_equation'),
 	url(r'^admin/', admin.site.urls, name='login_redirect'),
 	url(r'^logout/$', views.logout_view, name='logout'),
 	url(r'^srs/video_archive/$', views.video_list, name='video_list'),
