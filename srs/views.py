@@ -1,4 +1,4 @@
-import re
+import re, time
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
 from django.contrib.auth import logout
@@ -9,10 +9,7 @@ from srs.models import Directory, Notefile, Notecard, Video, Audio, Document, Eq
 from srs.forms import NotefileForm, DirectoryForm, ImportForm, VideoForm, AudioForm, DocumentForm, NotecardForm, EquationForm
 from django.core import serializers
 from pathlib import Path
-from thumbnails import get_thumbnail
-#from urllib2 import urlopen
-#import mimetypes
-import urllib
+from pytube import YouTube
 import os.path
 import json
 
@@ -232,6 +229,9 @@ def notecard_detail(request, pk):
 
 
 def create_video(request, pk):
+    youtubeError = False
+    badSource = False
+    badType = False
     parentNotecard = get_object_or_404(Notecard, pk=pk)
 
     # calculate path
@@ -250,29 +250,50 @@ def create_video(request, pk):
             video.created_date = timezone.now()
             video.notecard = parentNotecard
 
-            my_vid = Path(video.url)
             # video is a file on computer
-            if(my_vid.is_file()):
+            if os.path.isfile(video.url):
                 with open(video.url, 'rb') as vid_file:
                     extension = os.path.splitext(video.url)[1]
-                    video.video.save(video.title + extension, File(vid_file), save=True)
+                    # Make sure file has correct extension
+                    if extension in (".mp4", ".mpg", ".mov", ".asv", ".asf", ".wmv", ".flv"):
+                        video.video.save(video.title + extension, File(vid_file), save=True)
+                        # TODO generate thumbnail for video
+                        video.save()
+                        return redirect('notecard_detail', pk=pk)
+                    else:
+                        badType = True
             # video is from internet or has a bad path
             else:
-                # TODO add code here to check if url is valid video (if not then show error), then download and save video
+                # check if video is from youtube
                 validation = youtube_url_validation(video.url)
                 if(validation == 'valid'):
-                    print('URL is valid')
+                    try:
+                        #Used library defined in https://github.com/nficano/pytube
+                        yt = YouTube(video.url)
+                        yt.set_filename(video.title)
+                        ytVideo = yt.filter('mp4')[-1]
+                        downloadToPath = get_download_path(video.title+'.mp4')
+                        #If directory does not exist, it is created.
+                        directory = os.path.dirname(downloadToPath)
+                        if not os.path.exists(directory):
+                            os.makedirs(directory)
+                        #Download video
+                        ytVideo.download(directory)
+                        video.video = directory + "/" + video.title + ".mp4"
+                    except:
+                        # An error occured with youtube
+                        youtubeError = True;
+                        return render(request, 'srs/create_video.html', {'form': form, 'pk':pk, 'path':path, 'badSource':badSource, 'youtubeError':youtubeError, 'badType':badType})
                 else:
-                    print('URL is invalid')
-
-            # TODO generate thumbnail for video
-            #video.thumbnail = get_thumbnail(video.url, '300x300', crop='center')
-
-            video.save()
-            return redirect('notecard_detail', pk=pk)
+                    print("TODO")
+                    #TODO add check to see if it's a valid internet URL (even if it's not youtube) also CHECK FILE EXTENSION LIKE ABOVE
+                    # if validInternetURL:
+                    #     check extension and then save (set badType = true if it's a bad extension)
+                    # else:
+                    #     badSource = True
     else:
         form = VideoForm()
-    return render(request, 'srs/create_video.html', {'form': form, 'pk':pk, 'path':path})
+    return render(request, 'srs/create_video.html', {'form': form, 'pk':pk, 'path':path, 'badSource':badSource, 'youtubeError':youtubeError, 'badType':badType})
 
 
 def youtube_url_validation(url):
@@ -288,7 +309,14 @@ def youtube_url_validation(url):
     return 'invalid'
 
 
+#Get the path where you want to download your video to.
+def get_download_path(filename):
+    return os.getcwd()+'/srs/media/videos/'+time.strftime("%Y/%m/%d")+'/'+filename
+
+
 def create_audio(request, pk):
+    badType = False
+    badSource = False
     parentNotecard = get_object_or_404(Notecard, pk=pk)
 
     # calculate path
@@ -312,22 +340,31 @@ def create_audio(request, pk):
             if(my_audio.is_file()):
                 with open(audio.url, 'rb') as audio_file:
                     extension = os.path.splitext(audio.url)[1]
-                    audio.audio.save(audio.title + extension, File(audio_file), save=True)
+
+                    # Make sure file has correct extension
+                    if extension in (".mp3", ".wav", ".wma", ".webm", ".m4a"):
+                        audio.audio.save(audio.title + extension, File(audio_file), save=True)
+                        audio.save()
+                        return redirect('notecard_detail', pk=pk)
+                    else:
+                        badType = True
             # audio is from internet or has a bad path
             else:
-                # TODO add code here to check if url is valid audio (if not then show error), then download and save audio
-                print("Internet path")
+                print("TODO")
+                # TODO add code here to check if url is valid audio (if not then show error), then download and save audio (also CHECK EXTENSION LIKE ABOVE)
+                # if validInternetURL:
+                #     check extension and then save (set badType = true if it's a bad extension)
+                # else:
+                #     badSource = True
 
-            audio.save()
-            return redirect('notecard_detail', pk=pk)
     else:
         form = AudioForm()
-    return render(request, 'srs/create_audio.html', {'form': form, 'pk':pk, 'path':path})
+    return render(request, 'srs/create_audio.html', {'form': form, 'pk':pk, 'path':path, "badType":badType, "badSource":badSource})
 
 
 def create_document(request, pk):
-    badType = False;
-    badFile = False;
+    badType = False
+    badFile = False
     parentNotecard = get_object_or_404(Notecard, pk=pk)
 
     # calculate path
@@ -351,7 +388,6 @@ def create_document(request, pk):
             if(my_doc.is_file()):
                 with open(document.source, 'rb') as document_file:
                     extension = os.path.splitext(document.source)[1]
-                    print(extension)
                     if extension in (".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx", ".pps", ".ppsx"):
                         document.name = os.path.basename(document.source)
                         document.document.save(document.name, File(document_file), save=True)
@@ -359,10 +395,10 @@ def create_document(request, pk):
                         return redirect('notecard_detail', pk=pk)
                     # The file type is not allowed
                     else:
-                        badType = True;
+                        badType = True
             # There is not a file at that location
             else:
-                badFile = True;
+                badFile = True
     else:
         form = DocumentForm()
     return render(request, 'srs/create_document.html', {'form': form, 'pk':pk, 'badFile': badFile, 'badType': badType, 'path':path})

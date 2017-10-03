@@ -6,10 +6,19 @@
 
 {% block content %}
     <h2>Add video</h2>
-    <p>Enter the file path or URL for the video you want to add.</p>
+    <p>Enter the file path or youtube URL for the video you want to add.</p>
     <form method="POST" class="post-form">{% csrf_token %}
         {{ form.as_p }}
         <button type="submit" class="save btn btn-default">Save</button>
         <a href="{% url 'notecard_detail' pk=pk %}" class="cancel btn btn-default">Cancel</a>
+        {% if badSource %}
+            <p class="error">Error: The source you entered is invalid!</p>
+        {% endif %}
+        {% if youtubeError %}
+            <p class="error">Error: There was a problem downloading the youtube video!</p>
+        {% endif %}
+        {% if badType %}
+            <p class="error">Error: The video must be of type .mp4, .mpg, .mov, .asv, .asf, .wmv, or .flv!</p>
+        {% endif %}
     </form>
 {% endblock %}

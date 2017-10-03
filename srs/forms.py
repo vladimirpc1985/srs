@@ -43,6 +43,7 @@ class AudioForm(forms.ModelForm):
         super(AudioForm, self).__init__(*args, **kwargs)
         self.fields['url'].label = 'Source'
 
+
 class DocumentForm(forms.ModelForm):
     class Meta:
         model = Document

@@ -11,5 +11,11 @@
         {{ form.as_p }}
         <button type="submit" class="save btn btn-default">Save</button>
         <a href="{% url 'notecard_detail' pk=pk %}" class="cancel btn btn-default">Cancel</a>
+        {% if badSource %}
+            <p class="error">Error: The source you entered is invalid!</p>
+        {% endif %}
+        {% if badType %}
+            <p class="error">Error: The audio must be of type .mp3, .wma, .m4a, .webm or .wav!</p>
+        {% endif %}
     </form>
 {% endblock %}
