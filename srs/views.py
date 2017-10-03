@@ -12,6 +12,7 @@ from pathlib import Path
 from pytube import YouTube
 import os.path
 import json
+import requests
 
 def logout_view(request):
     logout(request)
@@ -255,7 +256,7 @@ def create_video(request, pk):
                 with open(video.url, 'rb') as vid_file:
                     extension = os.path.splitext(video.url)[1]
                     # Make sure file has correct extension
-                    if extension in (".mp4", ".mpg", ".mov", ".asv", ".asf", ".wmv", ".flv"):
+                    if is_supported_video_extension(extension):
                         video.video.save(video.title + extension, File(vid_file), save=True)
                         # TODO generate thumbnail for video
                         video.save()
@@ -281,7 +282,7 @@ def create_video(request, pk):
                         ytVideo.download(directory)
                         video.video = directory + "/" + video.title + ".mp4"
                     except:
-                        # An error occured with youtube
+                        # An error occurred with youtube
                         youtubeError = True;
                         return render(request, 'srs/create_video.html', {'form': form, 'pk':pk, 'path':path, 'badSource':badSource, 'youtubeError':youtubeError, 'badType':badType})
                 else:
@@ -313,6 +314,9 @@ def youtube_url_validation(url):
 def get_download_path(filename):
     return os.getcwd()+'/srs/media/videos/'+time.strftime("%Y/%m/%d")+'/'+filename
 
+#Returns True if video extension is supported.
+def is_supported_video_extension(extension):
+    return extension in (".mp4", ".mpg", ".mov", ".asv", ".asf", ".wmv", ".flv")
 
 def create_audio(request, pk):
     badType = False
@@ -388,21 +392,54 @@ def create_document(request, pk):
             if(my_doc.is_file()):
                 with open(document.source, 'rb') as document_file:
                     extension = os.path.splitext(document.source)[1]
-                    if extension in (".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx", ".pps", ".ppsx"):
-                        document.name = os.path.basename(document.source)
+                    if is_supported_document_extension(extension):
+                        document.name = document.source.split('/')[-1].split('.')[0]
                         document.document.save(document.name, File(document_file), save=True)
                         document.save()
                         return redirect('notecard_detail', pk=pk)
                     # The file type is not allowed
                     else:
                         badType = True
-            # There is not a file at that location
+            # There is not a local file at that location
             else:
-                badFile = True
+                #Check is there is a document online at this URL
+                try:
+                    myRequest = requests.get(document.source)
+                    #Web site does exist; let us check if there is a file in the given URL.
+                    if myRequest.status_code == 200:
+                        #Check that extension is correct
+                        extension = os.path.splitext(document.source)[1]
+                        if(is_supported_document_extension(extension)):
+                            response = requests.get(document.source)
+                            document.name = os.path.basename(document.source)
+                            downloadToPath = get_download_document_path(document.name)
+                            with open(downloadToPath, 'wb') as doc_file:
+                                doc_file.write(response.content)
+                            with open(downloadToPath, 'rb') as doc_file:
+                                document.document.save(document.name + extension, File(doc_file), save=True)
+                            document.save()
+                            return redirect('notecard_detail', pk=pk)
+                        else:
+                            badType = True
+                    #Website does not exist; it is a bad URL for the document
+                    else:
+                        print('Web site does not exist')
+                        badFile = True
+                #Website does not exist; it is a bad URL
+                except:
+                    print('An error occurred')
+                    badFile = True
     else:
         form = DocumentForm()
     return render(request, 'srs/create_document.html', {'form': form, 'pk':pk, 'badFile': badFile, 'badType': badType, 'path':path})
 
+#Returns True if document extension is supported.
+def is_supported_document_extension(extension):
+    return extension in (".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx", ".pps", ".ppsx")
+
+#Get the path where you want to download your document to.
+def get_download_document_path(filename):
+    return os.getcwd()+'/srs/media/documents/'+time.strftime("%Y/%m/%d")+'/'+filename
 
 def create_equation(request, pk):
     parentNotecard = get_object_or_404(Notecard, pk=pk)
