@@ -373,15 +373,18 @@ def create_audio(request, pk):
                 #Check if URL is valid
                 myRequest = requests.get(audio.url)
                 if myRequest.status_code == 200:
-                    print('Valid')
                     #Check if extension is correct.
                     extension = os.path.splitext(audio.url)[1]
                     if is_supported_audio_extension(extension):
                         #Download audio from internet
                         response = requests.get(audio.url)
                         audio.title = os.path.basename(audio.url)
-                        downloadToPath = get_download_audio_path(audio.url)
-                        with open(audio.url, 'wb') as audio_file:
+                        downloadToPath = get_download_audio_path(audio.title)
+                        #If directory does not exist, it is created.
+                        directory = os.path.dirname(downloadToPath)
+                        if not os.path.exists(directory):
+                            os.makedirs(directory)
+                        with open(downloadToPath, 'wb') as audio_file:
                             audio_file.write(response.content)
                         #Save downloaded audio into database
                         with open(downloadToPath, 'rb') as audio_file:
