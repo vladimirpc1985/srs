@@ -278,20 +278,37 @@ def create_video(request, pk):
                         directory = os.path.dirname(downloadToPath)
                         if not os.path.exists(directory):
                             os.makedirs(directory)
-                        #Download video
+                        #Download video into local directory
                         ytVideo.download(directory)
-                        video.video = directory + "/" + video.title + ".mp4"
+                        #Save downloaded video into database.
+                        with open(downloadToPath, 'rb') as vid_file:
+                            extension = os.path.splitext(downloadToPath)[1]
+                            video.video.save(video.title + extension, File(vid_file), save=True)
+                            # TODO generate thumbnail for video
+                            video.save()
+                            return redirect('notecard_detail', pk=pk)
                     except:
+                        print('Shit went down')
                         # An error occurred with youtube
-                        youtubeError = True;
+                        youtubeError = True
                         return render(request, 'srs/create_video.html', {'form': form, 'pk':pk, 'path':path, 'badSource':badSource, 'youtubeError':youtubeError, 'badType':badType})
                 else:
-                    print("TODO")
-                    #TODO add check to see if it's a valid internet URL (even if it's not youtube) also CHECK FILE EXTENSION LIKE ABOVE
-                    # if validInternetURL:
-                    #     check extension and then save (set badType = true if it's a bad extension)
-                    # else:
-                    #     badSource = True
+                    #Check to see if it's a valid internet URL
+                    myRequest = requests.get(video.url)
+                    if myRequest.status_code == 200:
+                        #Check video extension
+                        extension = os.path.splitext(video.url)[1]
+                        if(is_supported_video_extension(extension)):
+                            print('Valid extension')
+                            with open(video.url, 'rb') as vid_file:
+                                video.video.save(video.title + extension, File(vid_file), save=True)
+                                # TODO generate thumbnail for video
+                                video.save()
+                                return redirect('notecard_detail', pk=pk)
+                        else:
+                            badType = True
+                    else:
+                        badSource = True
     else:
         form = VideoForm()
     return render(request, 'srs/create_video.html', {'form': form, 'pk':pk, 'path':path, 'badSource':badSource, 'youtubeError':youtubeError, 'badType':badType})
