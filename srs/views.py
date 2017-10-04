@@ -288,7 +288,6 @@ def create_video(request, pk):
                             video.save()
                             return redirect('notecard_detail', pk=pk)
                     except:
-                        print('Shit went down')
                         # An error occurred with youtube
                         youtubeError = True
                         return render(request, 'srs/create_video.html', {'form': form, 'pk':pk, 'path':path, 'badSource':badSource, 'youtubeError':youtubeError, 'badType':badType})
@@ -299,9 +298,16 @@ def create_video(request, pk):
                         #Check video extension
                         extension = os.path.splitext(video.url)[1]
                         if(is_supported_video_extension(extension)):
-                            print('Valid extension')
-                            with open(video.url, 'rb') as vid_file:
-                                video.video.save(video.title + extension, File(vid_file), save=True)
+                            downloadToPath = get_download_path(video.title)
+                            #If directory does not exist, it is created.
+                            directory = os.path.dirname(downloadToPath)
+                            if not os.path.exists(directory):
+                                os.makedirs(directory)
+                            with open(downloadToPath, 'wb') as video_file:
+                                video_file.write(myRequest.content)
+                            #Save downloaded audio into database
+                            with open(downloadToPath, 'rb') as video_file:
+                                video.video.save(video.title + extension, File(video_file), save=True)
                                 # TODO generate thumbnail for video
                                 video.save()
                                 return redirect('notecard_detail', pk=pk)
