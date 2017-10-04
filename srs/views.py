@@ -361,9 +361,8 @@ def create_audio(request, pk):
             if(my_audio.is_file()):
                 with open(audio.url, 'rb') as audio_file:
                     extension = os.path.splitext(audio.url)[1]
-
                     # Make sure file has correct extension
-                    if extension in (".mp3", ".wav", ".wma", ".webm", ".m4a"):
+                    if is_supported_audio_extension(extension):
                         audio.audio.save(audio.title + extension, File(audio_file), save=True)
                         audio.save()
                         return redirect('notecard_detail', pk=pk)
@@ -371,17 +370,39 @@ def create_audio(request, pk):
                         badType = True
             # audio is from internet or has a bad path
             else:
-                print("TODO")
-                # TODO add code here to check if url is valid audio (if not then show error), then download and save audio (also CHECK EXTENSION LIKE ABOVE)
-                # if validInternetURL:
-                #     check extension and then save (set badType = true if it's a bad extension)
-                # else:
-                #     badSource = True
-
+                #Check if URL is valid
+                myRequest = requests.get(audio.url)
+                if myRequest.status_code == 200:
+                    print('Valid')
+                    #Check if extension is correct.
+                    extension = os.path.splitext(audio.url)[1]
+                    if is_supported_audio_extension(extension):
+                        #Download audio from internet
+                        response = requests.get(audio.url)
+                        audio.title = os.path.basename(audio.url)
+                        downloadToPath = get_download_audio_path(audio.url)
+                        with open(audio.url, 'wb') as audio_file:
+                            audio_file.write(response.content)
+                        #Save downloaded audio into database
+                        with open(downloadToPath, 'rb') as audio_file:
+                            audio.audio.save(audio.title + extension, File(audio_file), save=True)
+                            audio.save()
+                            return redirect('notecard_detail', pk=pk)
+                    else:
+                        badType = True
+                else:
+                    badSource = True
     else:
         form = AudioForm()
     return render(request, 'srs/create_audio.html', {'form': form, 'pk':pk, 'path':path, "badType":badType, "badSource":badSource})
 
+#Returns True if audio extension is supported.
+def is_supported_audio_extension(extension):
+    return extension in (".mp3", ".wav", ".wma", ".webm", ".m4a")
+
+#Get the path where you want to download your audio file to.
+def get_download_audio_path(filename):
+    return os.getcwd()+'/srs/media/audio/'+time.strftime("%Y/%m/%d")+'/'+filename
 
 def create_document(request, pk):
     badType = False
