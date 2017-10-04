@@ -544,14 +544,13 @@ def checkFileFormat(request, lines, notefilePK):
             for i in range(length)[header_end_index+1:body_end_index]:
                 body += lines[i] + b'\r\n'
             #If everything's ok, then we create the notecard
-            create_notecard(request, keywords, header, body, notefilePK)
+            init_notecard(request, keywords, header, body, notefilePK)
             #Update current_line so we can get the data from the next notecard.
             current_line = body_end_index+1
     except ValueError as err:
         print(err.args)
 
-#TODO: Why does the new lines get removed from the strings in the DB?
-def create_notecard(request, keywords, header, body, notefilePK):
+def init_notecard(request, keywords, header, body, notefilePK):
     str_keywords = keywords.decode('ascii', 'ignore')
     str_header = header.decode('ascii', 'ignore')
     str_body = body.decode('ascii', 'ignore')
