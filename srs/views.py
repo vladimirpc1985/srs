@@ -12,6 +12,7 @@ from pathlib import Path
 from pytube import YouTube
 import os.path
 import json
+import requests
 
 def logout_view(request):
     logout(request)
@@ -255,7 +256,7 @@ def create_video(request, pk):
                 with open(video.url, 'rb') as vid_file:
                     extension = os.path.splitext(video.url)[1]
                     # Make sure file has correct extension
-                    if extension in (".mp4", ".mpg", ".mov", ".asv", ".asf", ".wmv", ".flv"):
+                    if is_supported_video_extension(extension):
                         video.video.save(video.title + extension, File(vid_file), save=True)
                         # TODO generate thumbnail for video
                         video.save()
@@ -277,20 +278,43 @@ def create_video(request, pk):
                         directory = os.path.dirname(downloadToPath)
                         if not os.path.exists(directory):
                             os.makedirs(directory)
-                        #Download video
+                        #Download video into local directory
                         ytVideo.download(directory)
-                        video.video = directory + "/" + video.title + ".mp4"
+                        #Save downloaded video into database.
+                        with open(downloadToPath, 'rb') as vid_file:
+                            extension = os.path.splitext(downloadToPath)[1]
+                            video.video.save(video.title + extension, File(vid_file), save=True)
+                            # TODO generate thumbnail for video
+                            video.save()
+                            return redirect('notecard_detail', pk=pk)
                     except:
-                        # An error occured with youtube
-                        youtubeError = True;
+                        # An error occurred with youtube
+                        youtubeError = True
                         return render(request, 'srs/create_video.html', {'form': form, 'pk':pk, 'path':path, 'badSource':badSource, 'youtubeError':youtubeError, 'badType':badType})
                 else:
-                    print("TODO")
-                    #TODO add check to see if it's a valid internet URL (even if it's not youtube) also CHECK FILE EXTENSION LIKE ABOVE
-                    # if validInternetURL:
-                    #     check extension and then save (set badType = true if it's a bad extension)
-                    # else:
-                    #     badSource = True
+                    #Check to see if it's a valid internet URL
+                    myRequest = requests.get(video.url)
+                    if myRequest.status_code == 200:
+                        #Check video extension
+                        extension = os.path.splitext(video.url)[1]
+                        if(is_supported_video_extension(extension)):
+                            downloadToPath = get_download_path(video.title)
+                            #If directory does not exist, it is created.
+                            directory = os.path.dirname(downloadToPath)
+                            if not os.path.exists(directory):
+                                os.makedirs(directory)
+                            with open(downloadToPath, 'wb') as video_file:
+                                video_file.write(myRequest.content)
+                            #Save downloaded audio into database
+                            with open(downloadToPath, 'rb') as video_file:
+                                video.video.save(video.title + extension, File(video_file), save=True)
+                                # TODO generate thumbnail for video
+                                video.save()
+                                return redirect('notecard_detail', pk=pk)
+                        else:
+                            badType = True
+                    else:
+                        badSource = True
     else:
         form = VideoForm()
     return render(request, 'srs/create_video.html', {'form': form, 'pk':pk, 'path':path, 'badSource':badSource, 'youtubeError':youtubeError, 'badType':badType})
@@ -313,6 +337,9 @@ def youtube_url_validation(url):
 def get_download_path(filename):
     return os.getcwd()+'/srs/media/videos/'+time.strftime("%Y/%m/%d")+'/'+filename
 
+#Returns True if video extension is supported.
+def is_supported_video_extension(extension):
+    return extension in (".mp4", ".mpg", ".mov", ".asv", ".asf", ".wmv", ".flv")
 
 def create_audio(request, pk):
     badType = False
@@ -340,9 +367,8 @@ def create_audio(request, pk):
             if(my_audio.is_file()):
                 with open(audio.url, 'rb') as audio_file:
                     extension = os.path.splitext(audio.url)[1]
-
                     # Make sure file has correct extension
-                    if extension in (".mp3", ".wav", ".wma", ".webm", ".m4a"):
+                    if is_supported_audio_extension(extension):
                         audio.audio.save(audio.title + extension, File(audio_file), save=True)
                         audio.save()
                         return redirect('notecard_detail', pk=pk)
@@ -350,17 +376,42 @@ def create_audio(request, pk):
                         badType = True
             # audio is from internet or has a bad path
             else:
-                print("TODO")
-                # TODO add code here to check if url is valid audio (if not then show error), then download and save audio (also CHECK EXTENSION LIKE ABOVE)
-                # if validInternetURL:
-                #     check extension and then save (set badType = true if it's a bad extension)
-                # else:
-                #     badSource = True
-
+                #Check if URL is valid
+                myRequest = requests.get(audio.url)
+                if myRequest.status_code == 200:
+                    #Check if extension is correct.
+                    extension = os.path.splitext(audio.url)[1]
+                    if is_supported_audio_extension(extension):
+                        #Download audio from internet
+                        response = requests.get(audio.url)
+                        audio.title = os.path.basename(audio.url)
+                        downloadToPath = get_download_audio_path(audio.title)
+                        #If directory does not exist, it is created.
+                        directory = os.path.dirname(downloadToPath)
+                        if not os.path.exists(directory):
+                            os.makedirs(directory)
+                        with open(downloadToPath, 'wb') as audio_file:
+                            audio_file.write(response.content)
+                        #Save downloaded audio into database
+                        with open(downloadToPath, 'rb') as audio_file:
+                            audio.audio.save(audio.title + extension, File(audio_file), save=True)
+                            audio.save()
+                            return redirect('notecard_detail', pk=pk)
+                    else:
+                        badType = True
+                else:
+                    badSource = True
     else:
         form = AudioForm()
     return render(request, 'srs/create_audio.html', {'form': form, 'pk':pk, 'path':path, "badType":badType, "badSource":badSource})
 
+#Returns True if audio extension is supported.
+def is_supported_audio_extension(extension):
+    return extension in (".mp3", ".wav", ".wma", ".webm", ".m4a")
+
+#Get the path where you want to download your audio file to.
+def get_download_audio_path(filename):
+    return os.getcwd()+'/srs/media/audio/'+time.strftime("%Y/%m/%d")+'/'+filename
 
 def create_document(request, pk):
     badType = False
@@ -388,21 +439,54 @@ def create_document(request, pk):
             if(my_doc.is_file()):
                 with open(document.source, 'rb') as document_file:
                     extension = os.path.splitext(document.source)[1]
-                    if extension in (".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx", ".pps", ".ppsx"):
-                        document.name = os.path.basename(document.source)
+                    if is_supported_document_extension(extension):
+                        document.name = document.source.split('/')[-1].split('.')[0]
                         document.document.save(document.name, File(document_file), save=True)
                         document.save()
                         return redirect('notecard_detail', pk=pk)
                     # The file type is not allowed
                     else:
                         badType = True
-            # There is not a file at that location
+            # There is not a local file at that location
             else:
-                badFile = True
+                #Check is there is a document online at this URL
+                try:
+                    myRequest = requests.get(document.source)
+                    #Web site does exist; let us check if there is a file in the given URL.
+                    if myRequest.status_code == 200:
+                        #Check that extension is correct
+                        extension = os.path.splitext(document.source)[1]
+                        if(is_supported_document_extension(extension)):
+                            response = requests.get(document.source)
+                            document.name = os.path.basename(document.source)
+                            downloadToPath = get_download_document_path(document.name)
+                            with open(downloadToPath, 'wb') as doc_file:
+                                doc_file.write(response.content)
+                            with open(downloadToPath, 'rb') as doc_file:
+                                document.document.save(document.name + extension, File(doc_file), save=True)
+                            document.save()
+                            return redirect('notecard_detail', pk=pk)
+                        else:
+                            badType = True
+                    #Website does not exist; it is a bad URL for the document
+                    else:
+                        print('Web site does not exist')
+                        badFile = True
+                #Website does not exist; it is a bad URL
+                except:
+                    print('An error occurred')
+                    badFile = True
     else:
         form = DocumentForm()
     return render(request, 'srs/create_document.html', {'form': form, 'pk':pk, 'badFile': badFile, 'badType': badType, 'path':path})
 
+#Returns True if document extension is supported.
+def is_supported_document_extension(extension):
+    return extension in (".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx", ".pps", ".ppsx")
+
+#Get the path where you want to download your document to.
+def get_download_document_path(filename):
+    return os.getcwd()+'/srs/media/documents/'+time.strftime("%Y/%m/%d")+'/'+filename
 
 def create_equation(request, pk):
     parentNotecard = get_object_or_404(Notecard, pk=pk)
