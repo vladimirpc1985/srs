@@ -6,7 +6,7 @@
 
 {% block content %}
     <h2>Add Document</h2>
-    <p>The source for the document can be a local file or an online file URL.
+    <p>The source for the document can be a local file or an online file URL.</p>
     <form method="POST" class="post-form" enctype="multipart/form-data">{% csrf_token %}
         {{ form.as_p }}
         <button type="submit" class="save btn btn-default">Save</button>
