@@ -233,6 +233,7 @@ def create_video(request, pk):
     youtubeError = False
     badSource = False
     badType = False
+    fileTooLarge = False
     parentNotecard = get_object_or_404(Notecard, pk=pk)
 
     # calculate path
@@ -257,7 +258,8 @@ def create_video(request, pk):
                     extension = os.path.splitext(video.url)[1]
                     # Make sure file has correct extension
                     if is_supported_video_extension(extension):
-                        video.video.save(video.title + extension, File(vid_file), save=True)
+                        # TODO check if file < 4GB (definitely do this before saving video), also updated fileTooLarge boolean to true
+                        video.video.save(video.title + time.strftime("%H%M%S") + extension, File(vid_file), save=True)
                         # TODO generate thumbnail for video
                         video.save()
                         return redirect('notecard_detail', pk=pk)
@@ -271,53 +273,54 @@ def create_video(request, pk):
                     try:
                         #Used library defined in https://github.com/nficano/pytube
                         yt = YouTube(video.url)
-                        yt.set_filename(video.title)
+                        yt.set_filename(video.title + time.strftime("%H%M%S"))
                         ytVideo = yt.filter('mp4')[-1]
-                        downloadToPath = get_download_path(video.title+'.mp4')
+                        downloadToPath = get_download_path(video.title + time.strftime("%H%M%S") + '.mp4')
                         #If directory does not exist, it is created.
                         directory = os.path.dirname(downloadToPath)
+                        # TODO check if file < 4GB (probably want to check this before download function/create dir, but you could delete it after downloading it I guess), also updated fileTooLarge boolean to true
                         if not os.path.exists(directory):
                             os.makedirs(directory)
                         #Download video into local directory
                         ytVideo.download(directory)
-                        #Save downloaded video into database.
-                        with open(downloadToPath, 'rb') as vid_file:
-                            extension = os.path.splitext(downloadToPath)[1]
-                            video.video.save(video.title + extension, File(vid_file), save=True)
-                            # TODO generate thumbnail for video
-                            video.save()
-                            return redirect('notecard_detail', pk=pk)
+                        video.video = downloadToPath
+                        # TODO generate thumbnail for video
+                        video.save()
+                        return redirect('notecard_detail', pk=pk)
                     except:
                         # An error occurred with youtube
                         youtubeError = True
                         return render(request, 'srs/create_video.html', {'form': form, 'pk':pk, 'path':path, 'badSource':badSource, 'youtubeError':youtubeError, 'badType':badType})
                 else:
-                    #Check to see if it's a valid internet URL
-                    myRequest = requests.get(video.url)
-                    if myRequest.status_code == 200:
-                        #Check video extension
-                        extension = os.path.splitext(video.url)[1]
-                        if(is_supported_video_extension(extension)):
-                            downloadToPath = get_download_path(video.title)
-                            #If directory does not exist, it is created.
-                            directory = os.path.dirname(downloadToPath)
-                            if not os.path.exists(directory):
-                                os.makedirs(directory)
-                            with open(downloadToPath, 'wb') as video_file:
-                                video_file.write(myRequest.content)
-                            #Save downloaded audio into database
-                            with open(downloadToPath, 'rb') as video_file:
-                                video.video.save(video.title + extension, File(video_file), save=True)
+                    try:
+                        #Check to see if it's a valid internet URL
+                        myRequest = requests.get(video.url)
+                        if myRequest.status_code == 200:
+                            #Check video extension
+                            extension = os.path.splitext(video.url)[1]
+                            if(is_supported_video_extension(extension)):
+                                downloadToPath = get_download_path(video.title + time.strftime("%H%M%S") + extension)
+                                #If directory does not exist, it is created.
+                                directory = os.path.dirname(downloadToPath)
+                                # TODO check if file < 4GB (probably want to check this before download function/create dir, but you could delete it after downloading it I guess), also updated fileTooLarge boolean to true
+                                if not os.path.exists(directory):
+                                    os.makedirs(directory)
+                                with open(downloadToPath, 'wb') as video_file:
+                                    video_file.write(myRequest.content)
+                                #Save downloaded audio into database
+                                video.video = downloadToPath
                                 # TODO generate thumbnail for video
                                 video.save()
                                 return redirect('notecard_detail', pk=pk)
+                            else:
+                                badType = True
                         else:
-                            badType = True
-                    else:
+                            badSource = True
+                    except:
                         badSource = True
     else:
         form = VideoForm()
-    return render(request, 'srs/create_video.html', {'form': form, 'pk':pk, 'path':path, 'badSource':badSource, 'youtubeError':youtubeError, 'badType':badType})
+    return render(request, 'srs/create_video.html', {'form': form, 'pk':pk, 'path':path, 'badSource':badSource, 'youtubeError':youtubeError, 'badType':badType, 'fileTooLarge': fileTooLarge})
 
 
 def youtube_url_validation(url):
@@ -362,44 +365,44 @@ def create_audio(request, pk):
             audio.created_date = timezone.now()
             audio.notecard = parentNotecard
 
-            my_audio = Path(audio.url)
             # audio is a file on computer
-            if(my_audio.is_file()):
+            if os.path.isfile(audio.url):
                 with open(audio.url, 'rb') as audio_file:
                     extension = os.path.splitext(audio.url)[1]
                     # Make sure file has correct extension
                     if is_supported_audio_extension(extension):
-                        audio.audio.save(audio.title + extension, File(audio_file), save=True)
+                        audio.audio.save(audio.title + time.strftime("%H%M%S") + extension, File(audio_file), save=True)
                         audio.save()
                         return redirect('notecard_detail', pk=pk)
                     else:
                         badType = True
             # audio is from internet or has a bad path
             else:
-                #Check if URL is valid
-                myRequest = requests.get(audio.url)
-                if myRequest.status_code == 200:
-                    #Check if extension is correct.
-                    extension = os.path.splitext(audio.url)[1]
-                    if is_supported_audio_extension(extension):
-                        #Download audio from internet
-                        response = requests.get(audio.url)
-                        audio.title = os.path.basename(audio.url)
-                        downloadToPath = get_download_audio_path(audio.title)
-                        #If directory does not exist, it is created.
-                        directory = os.path.dirname(downloadToPath)
-                        if not os.path.exists(directory):
-                            os.makedirs(directory)
-                        with open(downloadToPath, 'wb') as audio_file:
-                            audio_file.write(response.content)
-                        #Save downloaded audio into database
-                        with open(downloadToPath, 'rb') as audio_file:
-                            audio.audio.save(audio.title + extension, File(audio_file), save=True)
+                try:
+                    #Check if URL is valid
+                    myRequest = requests.get(audio.url)
+                    if myRequest.status_code == 200:
+                        #Check if extension is correct.
+                        extension = os.path.splitext(audio.url)[1]
+                        if is_supported_audio_extension(extension):
+                            #Download audio from internet
+                            response = requests.get(audio.url)
+                            downloadToPath = get_download_audio_path(audio.title + time.strftime("%H%M%S") + extension)
+                            #If directory does not exist, it is created.
+                            directory = os.path.dirname(downloadToPath)
+                            if not os.path.exists(directory):
+                                os.makedirs(directory)
+                            with open(downloadToPath, 'wb') as audio_file:
+                                audio_file.write(response.content)
+                            #Store location in db and save
+                            audio.audio = downloadToPath
                             audio.save()
                             return redirect('notecard_detail', pk=pk)
+                        else:
+                            badType = True
                     else:
-                        badType = True
-                else:
+                        badSource = True
+                except:
                     badSource = True
     else:
         form = AudioForm()
@@ -434,14 +437,14 @@ def create_document(request, pk):
             document.created_date = timezone.now()
             document.notecard = parentNotecard
 
-            my_doc = Path(document.source)
-            # If there location contains a file
-            if(my_doc.is_file()):
+            # If the location contains a file
+            if os.path.isfile(document.source):
                 with open(document.source, 'rb') as document_file:
                     extension = os.path.splitext(document.source)[1]
                     if is_supported_document_extension(extension):
-                        document.name = document.source.split('/')[-1].split('.')[0]
-                        document.document.save(document.name, File(document_file), save=True)
+                        document.name = os.path.basename(document.source)
+                        print("doc name = " + document.name)
+                        document.document.save(document.name.split('.')[0] + time.strftime("%H%M%S") + extension, File(document_file), save=True)
                         document.save()
                         return redirect('notecard_detail', pk=pk)
                     # The file type is not allowed
@@ -459,22 +462,19 @@ def create_document(request, pk):
                         if(is_supported_document_extension(extension)):
                             response = requests.get(document.source)
                             document.name = os.path.basename(document.source)
-                            downloadToPath = get_download_document_path(document.name)
+                            downloadToPath = get_download_document_path(document.name.split('.')[0] + time.strftime("%H%M%S") + extension)
                             with open(downloadToPath, 'wb') as doc_file:
                                 doc_file.write(response.content)
-                            with open(downloadToPath, 'rb') as doc_file:
-                                document.document.save(document.name + extension, File(doc_file), save=True)
+                            document.document = downloadToPath
                             document.save()
                             return redirect('notecard_detail', pk=pk)
                         else:
                             badType = True
                     #Website does not exist; it is a bad URL for the document
                     else:
-                        print('Web site does not exist')
                         badFile = True
                 #Website does not exist; it is a bad URL
                 except:
-                    print('An error occurred')
                     badFile = True
     else:
         form = DocumentForm()

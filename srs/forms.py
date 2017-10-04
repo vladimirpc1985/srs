@@ -49,10 +49,6 @@ class DocumentForm(forms.ModelForm):
         model = Document
         fields = ('source',)
 
-    def __init__(self, *args, **kwargs):
-        super(DocumentForm, self).__init__(*args, **kwargs)
-        self.fields['source'].label = "File Location"
-
 class EquationForm(forms.ModelForm):
     class Meta:
         model = Equation

@@ -6,7 +6,7 @@
 
 {% block content %}
     <h2>Add audio</h2>
-    <p>Enter the file path or URL for the audio you want to add.</p>
+    <p>The source for the audio can be a local audio file or an audio URL.</p>
     <form method="POST" class="post-form">{% csrf_token %}
         {{ form.as_p }}
         <button type="submit" class="save btn btn-default">Save</button>
@@ -15,7 +15,7 @@
             <p class="error">Error: The source you entered is invalid!</p>
         {% endif %}
         {% if badType %}
-            <p class="error">Error: The audio must be of type .mp3, .wma, .m4a, .webm or .wav!</p>
+            <p class="error">Error: The file must be audio!</p>
         {% endif %}
     </form>
 {% endblock %}

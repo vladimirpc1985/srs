@@ -6,7 +6,7 @@
 
 {% block content %}
     <h2>Add video</h2>
-    <p>Enter the file path or youtube URL for the video you want to add.</p>
+    <p>The source for the video can be a local video file, a youtube URL, or a video URL.</p>
     <form method="POST" class="post-form">{% csrf_token %}
         {{ form.as_p }}
         <button type="submit" class="save btn btn-default">Save</button>
@@ -18,7 +18,10 @@
             <p class="error">Error: There was a problem downloading the youtube video!</p>
         {% endif %}
         {% if badType %}
-            <p class="error">Error: The video must be of type .mp4, .mpg, .mov, .asv, .asf, .wmv, or .flv!</p>
+            <p class="error">Error: The file must be a video!</p>
+        {% endif %}
+        {% if badType %}
+            <p class="error">Error: The file must be smaller than 4GB!</p>
         {% endif %}
     </form>
 {% endblock %}
