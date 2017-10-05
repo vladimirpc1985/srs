@@ -506,7 +506,9 @@ def create_equation(request, pk):
             equation.author = request.user
             equation.created_date = timezone.now()
             equation.notecard = parentNotecard
-            equation.equation = "$$" + equation.equation + "$$"
+            print(equation.equation)
+            equation.equation = equation.equation.replace('<math', '<math display="block"')
+            print(equation.equation)
             equation.save()
             return redirect('notecard_detail', pk=pk)
     else:

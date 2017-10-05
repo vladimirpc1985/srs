@@ -1,12 +1,39 @@
 {% extends 'srs/base.html' %}
+{% load staticfiles %}
 
 {% block content %}
 		<h2>Create Notecard</h2>
-	  <p>You can add inline equations by surrounding them with "\(" and "\)".<br>(Group terms with "{}" and call special functions using syntax like "\sqrt") </p>
 	  <form method="POST">{% csrf_token %}
 	      {{ form.as_p }}
 	      <button type="submit" class="save btn btn-default">Save</button>
 	      <a href="{% url 'notecard_list' pk=pk %}" class="cancel btn btn-default">Cancel</a>
+				<a id="open-btn" class="insert btn btn-default">Insert Equation</a>
 	  </form>
+
+		<!-- Equation Modal -->
+    <div id="eqnmodal" class="modal equation-modal" role="dialog">
+        <div class="modal-dialog">
+
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button id="close-btn" class="close_btn btn">Close</button>
+                    <h2 class="eqn-modal-title">Insert Equation</h2>
+                </div>
+                <div class="modal-body">
+                    <div style="padding-top: 25px; height: 297px; width: 710px;" id="editorContainer"></div>
+										<div class="text-center">
+											<button id="insert-btn" class="insert btn">Insert</button>
+										</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+		<div class="backdrop"></div>
+
+		<script src = "http://www.wiris.net/demo/editor/editor"></script>
+		<script src="{% static 'js/insertEquation.js' %}"></script>
 
 {% endblock %}

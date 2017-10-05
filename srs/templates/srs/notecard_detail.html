@@ -18,11 +18,11 @@
         <h2>Keywords:</h2>
         <p>{{ notecard.keywords }}</p>
         <h2>Body:</h2>
-        <p>{{ notecard.body }}</p>
+        <p>{% autoescape off %}{{ notecard.body }}{% endautoescape %}</p>
         {% if equations %}
           <h2>Equations:</h2>
           {% for equation in equations %}
-              <p class="equation-container">{{equation.equation}}</p>
+              <p class="equation-container">{% autoescape off %}{{equation.equation}}{% endautoescape %}</p>
           {% endfor %}
         {% endif %}
 
