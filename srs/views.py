@@ -1,4 +1,4 @@
-import re, time
+import re, time, os.path, os
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
 from django.contrib.auth import logout
@@ -8,9 +8,7 @@ from django.contrib.auth.models import User
 from srs.models import Directory, Notefile, Notecard, Video, Audio, Document, Equation
 from srs.forms import NotefileForm, DirectoryForm, ImportForm, VideoForm, AudioForm, DocumentForm, NotecardForm, EquationForm
 from django.core import serializers
-from pathlib import Path
 from pytube import YouTube
-import os.path
 import json
 import requests
 
@@ -254,17 +252,19 @@ def create_video(request, pk):
 
             # video is a file on computer
             if os.path.isfile(video.url):
-                with open(video.url, 'rb') as vid_file:
-                    extension = os.path.splitext(video.url)[1]
-                    # Make sure file has correct extension
-                    if is_supported_video_extension(extension):
-                        # TODO check if file < 4GB (definitely do this before saving video), also updated fileTooLarge boolean to true
-                        video.video.save(video.title + time.strftime("%H%M%S") + extension, File(vid_file), save=True)
-                        # TODO generate thumbnail for video
-                        video.save()
-                        return redirect('notecard_detail', pk=pk)
-                    else:
-                        badType = True
+                #Check that the file size is allowed ( size <= 4GB)
+                fileTooLarge = is_valid_local_file_size(video.url)
+                if not fileTooLarge:
+                    with open(video.url, 'rb') as vid_file:
+                        extension = os.path.splitext(video.url)[1]
+                        # Make sure file has correct extension
+                        if is_supported_video_extension(extension):
+                            video.video.save(video.title + time.strftime("%H%M%S") + extension, File(vid_file), save=True)
+                            # TODO generate thumbnail for video
+                            video.save()
+                            return redirect('notecard_detail', pk=pk)
+                        else:
+                            badType = True
             # video is from internet or has a bad path
             else:
                 # check if video is from youtube
@@ -402,15 +402,17 @@ def create_audio(request, pk):
 
             # audio is a file on computer
             if os.path.isfile(audio.url):
-                with open(audio.url, 'rb') as audio_file:
-                    extension = os.path.splitext(audio.url)[1]
-                    # Make sure file has correct extension
-                    if is_supported_audio_extension(extension):
-                        audio.audio.save(audio.title + time.strftime("%H%M%S") + extension, File(audio_file), save=True)
-                        audio.save()
-                        return redirect('notecard_detail', pk=pk)
-                    else:
-                        badType = True
+                fileTooLarge = is_valid_local_file_size(audio.url)
+                if not fileTooLarge:
+                    with open(audio.url, 'rb') as audio_file:
+                        extension = os.path.splitext(audio.url)[1]
+                        # Make sure file has correct extension
+                        if is_supported_audio_extension(extension):
+                            audio.audio.save(audio.title + time.strftime("%H%M%S") + extension, File(audio_file), save=True)
+                            audio.save()
+                            return redirect('notecard_detail', pk=pk)
+                        else:
+                            badType = True
             # audio is from internet or has a bad path
             else:
                 try:
@@ -456,6 +458,13 @@ def is_supported_audio_extension(extension):
 def get_download_audio_path(filename):
     return os.getcwd()+'/srs/media/audio/'+time.strftime("%Y/%m/%d")+'/'+filename
 
+#Return true if file size is less than or equal to 4GB; false otherwise.
+def is_valid_local_file_size(source):
+    statinfo = os.stat(source)
+    size = statinfo.st_size
+    print(size)
+    return int(size) <= 4000000000
+
 def create_document(request, pk):
     badType = False
     badFile = False
@@ -480,16 +489,21 @@ def create_document(request, pk):
 
             # If the location contains a file
             if os.path.isfile(document.source):
-                with open(document.source, 'rb') as document_file:
-                    extension = os.path.splitext(document.source)[1]
-                    if is_supported_document_extension(extension):
-                        document.name = os.path.basename(document.source)
-                        document.document.save(document.name.split('.')[0] + time.strftime("%H%M%S") + extension, File(document_file), save=True)
-                        document.save()
-                        return redirect('notecard_detail', pk=pk)
-                    # The file type is not allowed
-                    else:
-                        badType = True
+                #Check that file size is allowed.
+                fileTooLarge = not is_valid_local_file_size(document.source)
+                if not fileTooLarge:
+                    with open(document.source, 'rb') as document_file:
+                        extension = os.path.splitext(document.source)[1]
+                        if is_supported_document_extension(extension):
+                            document.name = os.path.basename(document.source)
+                            document.document.save(document.name.split('.')[0] + time.strftime("%H%M%S") + extension, File(document_file), save=True)
+                            document.save()
+                            return redirect('notecard_detail', pk=pk)
+                        # The file type is not allowed
+                        else:
+                            badType = True
+                else:
+                    print('File is greater than 4GB')
             # There is not a local file at that location
             else:
                 #Check is there is a document online at this URL
