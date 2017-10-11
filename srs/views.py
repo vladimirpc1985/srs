@@ -253,7 +253,7 @@ def create_video(request, pk):
             # video is a file on computer
             if os.path.isfile(video.url):
                 #Check that the file size is allowed ( size <= 4GB)
-                fileTooLarge = is_valid_local_file_size(video.url)
+                fileTooLarge = not is_valid_local_file_size(video.url)
                 if not fileTooLarge:
                     with open(video.url, 'rb') as vid_file:
                         extension = os.path.splitext(video.url)[1]
@@ -269,7 +269,7 @@ def create_video(request, pk):
             else:
                 # check if video is from youtube
                 validation = youtube_url_validation(video.url)
-                if(validation == 'valid'):
+                if(validation):
                     try:
                         #Used library defined in https://github.com/nficano/pytube
                         yt = YouTube(video.url)
@@ -337,10 +337,7 @@ def youtube_url_validation(url):
         '(watch\?v=|embed/|v/|.+\?v=)?([^&=%\?]{11})')
 
     youtube_regex_match = re.match(youtube_regex, url)
-    if youtube_regex_match:
-        return 'valid'
-
-    return 'invalid'
+    return youtube_regex_match
 
 
 #Get the path where you want to download your video to.
