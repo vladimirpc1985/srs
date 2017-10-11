@@ -299,19 +299,22 @@ def create_video(request, pk):
                             #Check video extension
                             extension = os.path.splitext(video.url)[1]
                             if(is_supported_video_extension(extension)):
-                                downloadToPath = get_download_path(video.title + time.strftime("%H%M%S") + extension)
-                                #If directory does not exist, it is created.
-                                directory = os.path.dirname(downloadToPath)
-                                # TODO check if file < 4GB (probably want to check this before download function/create dir, but you could delete it after downloading it I guess), also updated fileTooLarge boolean to true
-                                if not os.path.exists(directory):
-                                    os.makedirs(directory)
-                                with open(downloadToPath, 'wb') as video_file:
-                                    video_file.write(myRequest.content)
-                                #Save downloaded audio into database
-                                video.video = downloadToPath
-                                # TODO generate thumbnail for video
-                                video.save()
-                                return redirect('notecard_detail', pk=pk)
+                                #Check if file size < 4GB
+                                fileTooLarge = not is_valid_file_size(myRequest)
+                                if not fileTooLarge:
+                                    #Download video if its size is allowed.
+                                    downloadToPath = get_download_path(video.title + time.strftime("%H%M%S") + extension)
+                                    #If directory does not exist, it is created.
+                                    directory = os.path.dirname(downloadToPath)
+                                    if not os.path.exists(directory):
+                                        os.makedirs(directory)
+                                    with open(downloadToPath, 'wb') as video_file:
+                                        video_file.write(myRequest.content)
+                                    #Save downloaded audio into database
+                                    video.video = downloadToPath
+                                    # TODO generate thumbnail for video
+                                    video.save()
+                                    return redirect('notecard_detail', pk=pk)
                             else:
                                 badType = True
                         else:
@@ -322,6 +325,10 @@ def create_video(request, pk):
         form = VideoForm()
     return render(request, 'srs/create_video.html', {'form': form, 'pk':pk, 'path':path, 'badSource':badSource, 'youtubeError':youtubeError, 'badType':badType, 'fileTooLarge': fileTooLarge})
 
+#Return true if file size is less than or equal to 4GB; false otherwise.
+def is_valid_file_size(request):
+    size = request.headers['Content-length']
+    return int(size) <= 4000000000
 
 def youtube_url_validation(url):
     youtube_regex = (
@@ -374,6 +381,7 @@ def is_supported_video_extension(extension):
 def create_audio(request, pk):
     badType = False
     badSource = False
+    fileTooLarge = False
     parentNotecard = get_object_or_404(Notecard, pk=pk)
 
     # calculate path
@@ -412,19 +420,22 @@ def create_audio(request, pk):
                         #Check if extension is correct.
                         extension = os.path.splitext(audio.url)[1]
                         if is_supported_audio_extension(extension):
-                            #Download audio from internet
-                            response = requests.get(audio.url)
-                            downloadToPath = get_download_audio_path(audio.title + time.strftime("%H%M%S") + extension)
-                            #If directory does not exist, it is created.
-                            directory = os.path.dirname(downloadToPath)
-                            if not os.path.exists(directory):
-                                os.makedirs(directory)
-                            with open(downloadToPath, 'wb') as audio_file:
-                                audio_file.write(response.content)
-                            #Store location in db and save
-                            audio.audio = downloadToPath
-                            audio.save()
-                            return redirect('notecard_detail', pk=pk)
+                            #Check if file size < 4GB
+                            fileTooLarge = not is_valid_file_size(myRequest)
+                            if not fileTooLarge:
+                                #Download audio from internet if file size is not allowed.
+                                response = requests.get(audio.url)
+                                downloadToPath = get_download_audio_path(audio.title + time.strftime("%H%M%S") + extension)
+                                #If directory does not exist, it is created.
+                                directory = os.path.dirname(downloadToPath)
+                                if not os.path.exists(directory):
+                                    os.makedirs(directory)
+                                with open(downloadToPath, 'wb') as audio_file:
+                                    audio_file.write(response.content)
+                                #Store location in db and save
+                                audio.audio = downloadToPath
+                                audio.save()
+                                return redirect('notecard_detail', pk=pk)
                         else:
                             badType = True
                     else:
@@ -433,7 +444,7 @@ def create_audio(request, pk):
                     badSource = True
     else:
         form = AudioForm()
-    return render(request, 'srs/create_audio.html', {'form': form, 'pk':pk, 'path':path, "badType":badType, "badSource":badSource})
+    return render(request, 'srs/create_audio.html', {'form': form, 'pk':pk, 'path':path, "badType":badType, "badSource":badSource, "fileTooLarge":fileTooLarge})
 
 #Returns True if audio extension is supported.
 def is_supported_audio_extension(extension):
@@ -448,6 +459,7 @@ def get_download_audio_path(filename):
 def create_document(request, pk):
     badType = False
     badFile = False
+    fileTooLarge = False
     parentNotecard = get_object_or_404(Notecard, pk=pk)
 
     # calculate path
@@ -472,7 +484,6 @@ def create_document(request, pk):
                     extension = os.path.splitext(document.source)[1]
                     if is_supported_document_extension(extension):
                         document.name = os.path.basename(document.source)
-                        print("doc name = " + document.name)
                         document.document.save(document.name.split('.')[0] + time.strftime("%H%M%S") + extension, File(document_file), save=True)
                         document.save()
                         return redirect('notecard_detail', pk=pk)
@@ -489,14 +500,16 @@ def create_document(request, pk):
                         #Check that extension is correct
                         extension = os.path.splitext(document.source)[1]
                         if(is_supported_document_extension(extension)):
-                            response = requests.get(document.source)
-                            document.name = os.path.basename(document.source)
-                            downloadToPath = get_download_document_path(document.name.split('.')[0] + time.strftime("%H%M%S") + extension)
-                            with open(downloadToPath, 'wb') as doc_file:
-                                doc_file.write(response.content)
-                            document.document = downloadToPath
-                            document.save()
-                            return redirect('notecard_detail', pk=pk)
+                            fileTooLarge = is_valid_file_size(myRequest)
+                            if not fileTooLarge:
+                                response = requests.get(document.source)
+                                document.name = os.path.basename(document.source)
+                                downloadToPath = get_download_document_path(document.name.split('.')[0] + time.strftime("%H%M%S") + extension)
+                                with open(downloadToPath, 'wb') as doc_file:
+                                    doc_file.write(response.content)
+                                document.document = downloadToPath
+                                document.save()
+                                return redirect('notecard_detail', pk=pk)
                         else:
                             badType = True
                     #Website does not exist; it is a bad URL for the document
@@ -507,7 +520,7 @@ def create_document(request, pk):
                     badFile = True
     else:
         form = DocumentForm()
-    return render(request, 'srs/create_document.html', {'form': form, 'pk':pk, 'badFile': badFile, 'badType': badType, 'path':path})
+    return render(request, 'srs/create_document.html', {'form': form, 'pk':pk, 'badFile': badFile, 'badType': badType, 'path':path, 'fileTooLarge':fileTooLarge})
 
 #Returns True if document extension is supported.
 def is_supported_document_extension(extension):
