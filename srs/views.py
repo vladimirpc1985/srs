@@ -1,16 +1,24 @@
-import re, time, os.path, os
+import json
+import os
+import os.path
+import re
+import time
+import subprocess
+
+import requests
+from django.contrib import messages
+from django.contrib.auth import logout
+from django.contrib.auth.models import User
+from django.core import serializers
+from django.core.files import File
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
-from django.contrib.auth import logout
-from django.core.files import File
-from django.contrib import messages
-from django.contrib.auth.models import User
-from srs.models import Directory, Notefile, Notecard, Video, Audio, Document, Equation
-from srs.forms import NotefileForm, DirectoryForm, ImportForm, VideoForm, AudioForm, DocumentForm, NotecardForm, EquationForm
-from django.core import serializers
 from pytube import YouTube
-import json
-import requests
+
+from srs.forms import NotefileForm, DirectoryForm, ImportForm, VideoForm, AudioForm, DocumentForm, NotecardForm, \
+    EquationForm
+from srs.models import Directory, Notefile, Notecard, Video, Audio, Document, Equation
+
 
 def logout_view(request):
     logout(request)
@@ -261,6 +269,8 @@ def create_video(request, pk):
                         if is_supported_video_extension(extension):
                             video.video.save(video.title + time.strftime("%H%M%S") + extension, File(vid_file), save=True)
                             # TODO generate thumbnail for video
+                            #video.thumbnail = get_thumbnail(video.url)
+                            get_thumbnail(video.url)
                             video.save()
                             return redirect('notecard_detail', pk=pk)
                         else:
@@ -283,6 +293,8 @@ def create_video(request, pk):
                             os.makedirs(directory)
                         #Download video into local directory
                         ytVideo.download(directory)
+                        #TODO: Check if file size is too large. If it is, delete the downloaded file.
+                        #fileTooLarge = not is_valid_local_file_size(downloadToPath)
                         video.video = downloadToPath
                         # TODO generate thumbnail for video
                         video.save()
@@ -339,6 +351,17 @@ def youtube_url_validation(url):
     youtube_regex_match = re.match(youtube_regex, url)
     return youtube_regex_match
 
+def get_thumbnail(source):
+    video_input_path = source
+    filename = 'thumbnail' + time.strftime("%Y%m%d") + '.jpg'
+    img_output_path = os.getcwd()+'/srs/media/thumbnails-cache/'+time.strftime("%Y/%m/%d")+'/'+filename
+    #If directory does not exist, it is created.
+    directory = os.path.dirname(img_output_path)
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+    subprocess.call(['ffmpeg', '-i', video_input_path, '-ss', '00:00:00.000', '-vframes', '1', img_output_path])
+    print('got thumbnail')
+    print(img_output_path)
 
 #Get the path where you want to download your video to.
 def get_download_path(filename):
@@ -461,7 +484,6 @@ def get_download_audio_path(filename):
 def is_valid_local_file_size(source):
     statinfo = os.stat(source)
     size = statinfo.st_size
-    print(size)
     return int(size) <= 4000000000
 
 def create_document(request, pk):
