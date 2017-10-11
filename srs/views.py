@@ -402,7 +402,7 @@ def create_audio(request, pk):
 
             # audio is a file on computer
             if os.path.isfile(audio.url):
-                fileTooLarge = is_valid_local_file_size(audio.url)
+                fileTooLarge = not is_valid_local_file_size(audio.url)
                 if not fileTooLarge:
                     with open(audio.url, 'rb') as audio_file:
                         extension = os.path.splitext(audio.url)[1]
@@ -413,6 +413,8 @@ def create_audio(request, pk):
                             return redirect('notecard_detail', pk=pk)
                         else:
                             badType = True
+                else:
+                    print('Audio file size is greater than 4GB')
             # audio is from internet or has a bad path
             else:
                 try:
