@@ -14,6 +14,7 @@ from django.core.files import File
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
 from pytube import YouTube
+from PIL import Image
 
 from srs.forms import NotefileForm, DirectoryForm, ImportForm, VideoForm, AudioForm, DocumentForm, NotecardForm, \
     EquationForm
@@ -270,7 +271,8 @@ def create_video(request, pk):
                             video.video.save(video.title + time.strftime("%H%M%S") + extension, File(vid_file), save=True)
                             # TODO generate thumbnail for video
                             #video.thumbnail = get_thumbnail(video.url)
-                            get_thumbnail(video.url)
+                            thumbnail_path = get_thumbnail(video.url)
+                            video.thumbnail = thumbnail_path
                             video.save()
                             return redirect('notecard_detail', pk=pk)
                         else:
@@ -353,15 +355,14 @@ def youtube_url_validation(url):
 
 def get_thumbnail(source):
     video_input_path = source
-    filename = 'thumbnail' + time.strftime("%Y%m%d") + '.jpg'
-    img_output_path = os.getcwd()+'/srs/media/thumbnails-cache/'+time.strftime("%Y/%m/%d")+'/'+filename
+    filename = 'thumbnail' + time.strftime("%H%M%S") + '.jpg'
+    img_output_path = os.getcwd()+'/srs/media/thumbnails/'+time.strftime("%Y/%m/%d")+'/'+filename
     #If directory does not exist, it is created.
     directory = os.path.dirname(img_output_path)
     if not os.path.exists(directory):
         os.makedirs(directory)
     subprocess.call(['ffmpeg', '-i', video_input_path, '-ss', '00:00:00.000', '-vframes', '1', img_output_path])
-    print('got thumbnail')
-    print(img_output_path)
+    return 'thumbnails/'+time.strftime("%Y/%m/%d")+'/'+filename
 
 #Get the path where you want to download your video to.
 def get_download_path(filename):

@@ -4,6 +4,9 @@ from django.db.models.signals import post_save
 from django.contrib.auth.models import User
 import os.path
 
+from thumbnails import get_thumbnail
+
+
 def create_folder(sender, instance, created, **kwargs):
     if not created:  # if it's not a new object return
         return
@@ -78,6 +81,7 @@ class Video(models.Model):
 
     def create(self):
         self.created_date = timezone.now()
+        #self.thumbnail = get_thumbnail(self.original, '50x50', crop='center', quality=99).url
         self.save()
 
     def __str__(self):
