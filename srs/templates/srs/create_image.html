@@ -1,0 +1,21 @@
+{% extends 'srs/base.html' %}
+{% load staticfiles %}
+
+{% block site_content %}
+{% endblock %}
+
+{% block content %}
+    <h2>Add image</h2>
+    <p>The source for the image can be a local image file or a image URL.</p>
+    <form method="POST" class="post-form">{% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="save btn btn-default">Save</button>
+        <a href="{% url 'notecard_detail' pk=pk %}" class="cancel btn btn-default">Cancel</a>
+        {% if badSource %}
+            <p class="error">Error: The source you entered is invalid!</p>
+        {% endif %}
+        {% if badType %}
+            <p class="error">Error: The file must be an image!</p>
+        {% endif %}
+    </form>
+{% endblock %}

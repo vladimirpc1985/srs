@@ -17,7 +17,7 @@ from pytube import YouTube
 from PIL import Image
 
 from srs.forms import NotefileForm, DirectoryForm, ImportForm, VideoForm, AudioForm, DocumentForm, NotecardForm, \
-    EquationForm
+    EquationForm, ImageForm
 from srs.models import Directory, Notefile, Notecard, Video, Audio, Document, Equation
 
 
@@ -232,8 +232,9 @@ def notecard_detail(request, pk):
     videos = Video.objects.filter(notecard=notecard)
     audios = Audio.objects.filter(notecard=notecard)
     documents = Document.objects.filter(notecard=notecard)
+    images = Image.objects.filter(notecard=notecard)
 
-    return render(request, 'srs/notecard_detail.html', {'notecard': notecard, 'pk': notecard.notefile.pk, 'path': path, 'videos': videos, 'audios': audios, 'documents': documents, 'equations': equations})
+    return render(request, 'srs/notecard_detail.html', {'notecard': notecard, 'pk': notecard.notefile.pk, 'path': path, 'videos': videos, 'audios': audios, 'documents': documents, 'equations': equations, 'images':images})
 
 
 def create_video(request, pk):
@@ -364,7 +365,13 @@ def get_thumbnail(source):
     directory = os.path.dirname(img_output_path)
     if not os.path.exists(directory):
         os.makedirs(directory)
-    subprocess.call(['avconv', '-i', video_input_path, '-ss', '00:00:05.000', '-vframes', '1', img_output_path])
+    #TODO: Get duration of the video, divide by 2 and get the corresponding frame.
+    #command = "avconv -i " + video_input_path + "2>&1 | grep Duration | cut -d ' ' -f 4 | sed -e 's/.\{4\}$//'"
+    #task = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
+    #time = task.communicate()[0]
+    #print('This video lasts ')
+    #print(time)
+    subprocess.call(['avconv', '-i', video_input_path, '-ss', '00:00:00.000', '-vframes', '1', img_output_path])
     return 'thumbnails/'+time.strftime("%Y/%m/%d")+'/'+filename
 
 #Get the path where you want to download your video to.
@@ -596,6 +603,34 @@ def create_equation(request, pk):
         form = EquationForm()
     return render(request, 'srs/create_equation.html', {'form': form, 'pk':pk, 'path':path})
 
+def create_image(request, pk):
+    badType = False
+    badFile = False
+    fileTooLarge = False
+    parentNotecard = get_object_or_404(Notecard, pk=pk)
+
+    # calculate path
+    notefile_Name = parentNotecard.notefile
+    path = getPath(request, notefile_Name.directory) + notefile_Name.name + "/"
+    if len(parentNotecard.name) > 20:
+        path += parentNotecard.name[:20] + "..."
+    else:
+        path += parentNotecard.name
+    print('The path is ')
+    print(path)
+    if(request.method == "POST"):
+        form = ImageForm(request.POST)
+        if form.is_valid():
+            image = form.save(commit=False)
+            image.author = request.user
+            image.created_date = timezone.now()
+            image.notecard = parentNotecard
+            #image.image = equation.equation.replace('<math', '<math display="block"')
+            image.save()
+            return redirect('notecard_detail', pk=pk)
+    else:
+        form = ImageForm()
+    return render(request, 'srs/create_image.html', {'form': form, 'pk':pk, 'path':path,'badFile': badFile, 'badType': badType, 'path':path, 'fileTooLarge':fileTooLarge})
 
 def about(request):
     return render(request, 'srs/about.html')
