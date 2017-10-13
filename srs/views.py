@@ -269,8 +269,7 @@ def create_video(request, pk):
                         # Make sure file has correct extension
                         if is_supported_video_extension(extension):
                             video.video.save(video.title + time.strftime("%H%M%S") + extension, File(vid_file), save=True)
-                            # TODO generate thumbnail for video
-                            #video.thumbnail = get_thumbnail(video.url)
+                            #Generate thumbnail
                             thumbnail_path = get_thumbnail(video.url)
                             video.thumbnail = thumbnail_path
                             video.save()
@@ -298,7 +297,9 @@ def create_video(request, pk):
                         #TODO: Check if file size is too large. If it is, delete the downloaded file.
                         #fileTooLarge = not is_valid_local_file_size(downloadToPath)
                         video.video = downloadToPath
-                        # TODO generate thumbnail for video
+                        #Generate thumbnail
+                        thumbnail_path = get_thumbnail(downloadToPath)
+                        video.thumbnail = thumbnail_path
                         video.save()
                         return redirect('notecard_detail', pk=pk)
                     except:
@@ -326,7 +327,9 @@ def create_video(request, pk):
                                         video_file.write(myRequest.content)
                                     #Save downloaded audio into database
                                     video.video = downloadToPath
-                                    # TODO generate thumbnail for video
+                                    #Generate thumbnail
+                                    thumbnail_path = get_thumbnail(downloadToPath)
+                                    video.thumbnail = thumbnail_path
                                     video.save()
                                     return redirect('notecard_detail', pk=pk)
                             else:
