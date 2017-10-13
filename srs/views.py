@@ -364,7 +364,7 @@ def get_thumbnail(source):
     directory = os.path.dirname(img_output_path)
     if not os.path.exists(directory):
         os.makedirs(directory)
-    subprocess.call(['avconv', '-i', video_input_path, '-ss', '00:00:00.000', '-vframes', '1', img_output_path])
+    subprocess.call(['avconv', '-i', video_input_path, '-ss', '00:00:05.000', '-vframes', '1', img_output_path])
     return 'thumbnails/'+time.strftime("%Y/%m/%d")+'/'+filename
 
 #Get the path where you want to download your video to.
