@@ -32,4 +32,5 @@ urlpatterns = [
 	url(r'^srs/video_archive/$', views.video_list, name='video_list'),
 	url(r'^srs/audio_archive/$', views.audio_list, name='audio_list'),
     url(r'^srs/document_archive/$', views.document_list, name='document_list'),
+	url(r'^srs/image_archive/$', views.image_list, name='image_list'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

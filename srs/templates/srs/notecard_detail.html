@@ -57,7 +57,16 @@
           {% endfor %}
         {% endif %}
 
-        <!--TODO: Add section here for images-->
+        <!--TODO: Modify section here for images so it looks good like videos-->
+        {% if images %}
+          <h2 class="top-pad">Images:</h2>
+          {% for img in images %}
+              <p >
+                <a href="/media/{{img.image}}" title="{{img.name}}">{{img.name}}</a>
+                <a data-path="/media/{{image.image}}" title="{{image.name}}" data-source="{{image.source}}"><img src="/media/{{image.source}}" width="190px" height="140px"></a>
+              </p>
+          {% endfor %}
+        {% endif %}
 
         <!-- Video Modal -->
         <div id="vidmodal" class="modal video-modal" role="dialog">

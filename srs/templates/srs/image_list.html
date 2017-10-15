@@ -1,0 +1,18 @@
+{% extends 'srs/base_srs.html' %}
+{% load staticfiles %}
+
+{% block site_content %}
+    <a href="{% url 'selection_view' %}" ><h2>Return to View Select</h2></a>
+{% endblock %}
+
+{% block content %}
+    <!--TODO: Modify section here for images so it looks good like videos-->
+    {% for image in images %}
+        <div>
+            <p>{{image.name}}</p>
+            <a data-path="/media/{{image.image}}" title="{{image.name}}" data-source="{{image.source}}"><img src="/media/{{image.source}}" width="190px" height="140px"></a>
+        </div>
+    {% endfor %}
+
+    <div class="backdrop"></div>
+{% endblock %}

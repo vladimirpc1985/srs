@@ -2,8 +2,8 @@ import json
 import os
 import os.path
 import re
-import time
 import subprocess
+import time
 
 import requests
 from django.contrib import messages
@@ -18,8 +18,7 @@ from PIL import Image
 
 from srs.forms import NotefileForm, DirectoryForm, ImportForm, VideoForm, AudioForm, DocumentForm, NotecardForm, \
     EquationForm, ImageForm
-from srs.models import Directory, Notefile, Notecard, Video, Audio, Document, Equation
-
+from srs.models import Directory, Notefile, Notecard, Video, Audio, Document, Equation, Image
 
 def logout_view(request):
     logout(request)
@@ -84,6 +83,9 @@ def document_list(request):
     documents = Document.objects.filter(created_date__lte=timezone.now())
     return render(request, 'srs/document_view.html', {'documents': documents})
 
+def image_list(request):
+    images = Image.objects.filter(created_date__lte=timezone.now())
+    return render(request, 'srs/image_list.html', {'images': images})
 
 def create_directory(request, pk):
     duplicate = False
@@ -232,9 +234,9 @@ def notecard_detail(request, pk):
     videos = Video.objects.filter(notecard=notecard)
     audios = Audio.objects.filter(notecard=notecard)
     documents = Document.objects.filter(notecard=notecard)
-    #images = Image.objects.filter(notecard=notecard)
-    #return render(request, 'srs/notecard_detail.html', {'notecard': notecard, 'pk': notecard.notefile.pk, 'path': path, 'videos': videos, 'audios': audios, 'documents': documents, 'equations': equations, 'images':images})
-    return render(request, 'srs/notecard_detail.html', {'notecard': notecard, 'pk': notecard.notefile.pk, 'path': path, 'videos': videos, 'audios': audios, 'documents': documents, 'equations': equations})
+    images = Image.objects.filter(notecard=notecard)
+    return render(request, 'srs/notecard_detail.html', {'notecard': notecard, 'pk': notecard.notefile.pk, 'path': path, 'videos': videos, 'audios': audios, 'documents': documents, 'equations': equations, 'images':images})
+    #return render(request, 'srs/notecard_detail.html', {'notecard': notecard, 'pk': notecard.notefile.pk, 'path': path, 'videos': videos, 'audios': audios, 'documents': documents, 'equations': equations})
 
 
 def create_video(request, pk):
@@ -602,35 +604,6 @@ def create_equation(request, pk):
     else:
         form = EquationForm()
     return render(request, 'srs/create_equation.html', {'form': form, 'pk':pk, 'path':path})
-
-# def create_image(request, pk):
-#     badType = False
-#     badFile = False
-#     fileTooLarge = False
-#     parentNotecard = get_object_or_404(Notecard, pk=pk)
-#
-#     # calculate path
-#     notefile_Name = parentNotecard.notefile
-#     path = getPath(request, notefile_Name.directory) + notefile_Name.name + "/"
-#     if len(parentNotecard.name) > 20:
-#         path += parentNotecard.name[:20] + "..."
-#     else:
-#         path += parentNotecard.name
-#     print('The path is ')
-#     print(path)
-#     if(request.method == "POST"):
-#         print('I am saving the image here')
-#         form = ImageForm(request.POST)
-#         if form.is_valid():
-#             image = form.save(commit=False)
-#             image.author = request.user
-#             image.created_date = timezone.now()
-#             image.notecard = parentNotecard
-#             image.save()
-#             return redirect('notecard_detail', pk=pk)
-#     else:
-#         form = ImageForm()
-#     return render(request, 'srs/create_image.html', {'form': form, 'pk':pk, 'path':path,'badFile': badFile, 'badType': badType, 'path':path, 'fileTooLarge':fileTooLarge})
 
 def create_image(request, pk):
     badType = False
