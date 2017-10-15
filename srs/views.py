@@ -235,7 +235,7 @@ def notecard_detail(request, pk):
     audios = Audio.objects.filter(notecard=notecard)
     documents = Document.objects.filter(notecard=notecard)
     images = Image.objects.filter(notecard=notecard)
-    return render(request, 'srs/notecard_detail.html', {'notecard': notecard, 'pk': notecard.notefile.pk, 'path': path, 'videos': videos, 'audios': audios, 'documents': documents, 'equations': equations, 'images':images})
+    return render(request, 'srs/notecard_detail.html', {'notecard': notecard, 'pk': notecard.notefile.pk, 'path': path, 'videos': videos, 'audios': audios, 'documents': documents, 'equations': equations, 'images': images})
     #return render(request, 'srs/notecard_detail.html', {'notecard': notecard, 'pk': notecard.notefile.pk, 'path': path, 'videos': videos, 'audios': audios, 'documents': documents, 'equations': equations})
 
 
@@ -382,7 +382,7 @@ def get_download_path(filename):
 
 #Returns True if video extension is supported.
 def is_supported_video_extension(extension):
-    return extension in ('.264', '.3g2', '.3gp', '.3gp2', '.3gpp', '.3gpp2', '.3mm', '.3p2', '.60d', '.787', '.89', '.aaf', '.aec', '.aep', '.aepx',
+    return extension.lower() in ('.264', '.3g2', '.3gp', '.3gp2', '.3gpp', '.3gpp2', '.3mm', '.3p2', '.60d', '.787', '.89', '.aaf', '.aec', '.aep', '.aepx',
                          '.aet', '.aetx', '.ajp', '.ale', '.am', '.amc', '.amv', '.amx', '.anim', '.aqt', '.arcut', '.arf', '.asf', '.asx', '.avb',
                          '.avc', '.avd', '.avi', '.avp', '.avs', '.avs', '.avv', '.axm', '.bdm', '.bdmv', '.bdt2', '.bdt3', '.bik', '.bin', '.bix',
                          '.bmk', '.bnp', '.box', '.bs4', '.bsf', '.bvr', '.byu', '.camproj', '.camrec', '.camv', '.ced', '.cel', '.cine', '.cip',
@@ -485,7 +485,7 @@ def create_audio(request, pk):
 
 #Returns True if audio extension is supported.
 def is_supported_audio_extension(extension):
-    return extension in ('.3gp', '.aa', '.aac', '.aax', '.act', '.aiff', '.amr', '.ape', '.au', '.awb', '.dct', '.dss', '.dvf', '.flac',
+    return extension.lower() in ('.3gp', '.aa', '.aac', '.aax', '.act', '.aiff', '.amr', '.ape', '.au', '.awb', '.dct', '.dss', '.dvf', '.flac',
                          '.gsm', '.iklax', '.ivs', '.m4a', '.m4b', '.m4p', '.mmf', '.mp3', '.mpc', '.msv', '.ogg, .oga, mogg', '.opus',
                          '.ra, .rm', '.raw', '.sln', '.tta', '.vox', '.wav', '.wma', '.wv', '.webm', '.8svx')
 
@@ -572,7 +572,7 @@ def create_document(request, pk):
 
 #Returns True if document extension is supported.
 def is_supported_document_extension(extension):
-    return extension in (".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx", ".pps", ".ppsx")
+    return extension.lower() in (".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx", ".pps", ".ppsx")
 
 #Get the path where you want to download your document to.
 def get_download_document_path(filename):
@@ -681,7 +681,8 @@ def create_image(request, pk):
 #Returns True if image extension is supported.
 #TODO: all the major image formats (JPEG, GIF, PNG, BMP, etc.)
 def is_supported_image_extension(extension):
-    return extension in (".jpg", ".gif", ".png", ".bmp")
+    return extension.lower() in (".ani", ".bmp", ".cal", ".fax", ".gif", ".img", ".jbg", ".jpe", ".jpeg", ".jpg", ".mac",
+                                 ".pbm", ".pcd", ".pcx", ".pct", ".pgm", ".png", ".ppm", ".psd", ".ras", ".tga", ".tiff", ".wmf")
 
 #Get the path where you want to download your image file to.
 def get_download_image_path(filename):
