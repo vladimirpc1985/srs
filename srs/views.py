@@ -683,7 +683,7 @@ def create_image(request, pk):
                             if not fileTooLarge:
                                 #Download image from internet if file size is allowed.
                                 response = requests.get(image.source)
-                                downloadToPath = get_download_image_path(image.source + time.strftime("%H%M%S") + extension)
+                                downloadToPath = get_download_image_path(image.name + time.strftime("%H%M%S") + extension)
                                 #If directory does not exist, it is created.
                                 directory = os.path.dirname(downloadToPath)
                                 if not os.path.exists(directory):
@@ -691,14 +691,15 @@ def create_image(request, pk):
                                 with open(downloadToPath, 'wb') as image_file:
                                     image_file.write(response.content)
                                 #Store location in db and save
-                                image_file.audio = downloadToPath
-                                image_file.save()
+                                image.image = downloadToPath
+                                image.save()
                                 return redirect('notecard_detail', pk=pk)
                         else:
                             badType = True
                     else:
                         badSource = True
                 except:
+                    print('An error occurred while trying to save the image.')
                     badSource = True
     else:
         form = ImageForm()
