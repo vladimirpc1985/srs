@@ -232,9 +232,9 @@ def notecard_detail(request, pk):
     videos = Video.objects.filter(notecard=notecard)
     audios = Audio.objects.filter(notecard=notecard)
     documents = Document.objects.filter(notecard=notecard)
-    images = Image.objects.filter(notecard=notecard)
-
-    return render(request, 'srs/notecard_detail.html', {'notecard': notecard, 'pk': notecard.notefile.pk, 'path': path, 'videos': videos, 'audios': audios, 'documents': documents, 'equations': equations, 'images':images})
+    #images = Image.objects.filter(notecard=notecard)
+    #return render(request, 'srs/notecard_detail.html', {'notecard': notecard, 'pk': notecard.notefile.pk, 'path': path, 'videos': videos, 'audios': audios, 'documents': documents, 'equations': equations, 'images':images})
+    return render(request, 'srs/notecard_detail.html', {'notecard': notecard, 'pk': notecard.notefile.pk, 'path': path, 'videos': videos, 'audios': audios, 'documents': documents, 'equations': equations})
 
 
 def create_video(request, pk):
@@ -603,9 +603,38 @@ def create_equation(request, pk):
         form = EquationForm()
     return render(request, 'srs/create_equation.html', {'form': form, 'pk':pk, 'path':path})
 
+# def create_image(request, pk):
+#     badType = False
+#     badFile = False
+#     fileTooLarge = False
+#     parentNotecard = get_object_or_404(Notecard, pk=pk)
+#
+#     # calculate path
+#     notefile_Name = parentNotecard.notefile
+#     path = getPath(request, notefile_Name.directory) + notefile_Name.name + "/"
+#     if len(parentNotecard.name) > 20:
+#         path += parentNotecard.name[:20] + "..."
+#     else:
+#         path += parentNotecard.name
+#     print('The path is ')
+#     print(path)
+#     if(request.method == "POST"):
+#         print('I am saving the image here')
+#         form = ImageForm(request.POST)
+#         if form.is_valid():
+#             image = form.save(commit=False)
+#             image.author = request.user
+#             image.created_date = timezone.now()
+#             image.notecard = parentNotecard
+#             image.save()
+#             return redirect('notecard_detail', pk=pk)
+#     else:
+#         form = ImageForm()
+#     return render(request, 'srs/create_image.html', {'form': form, 'pk':pk, 'path':path,'badFile': badFile, 'badType': badType, 'path':path, 'fileTooLarge':fileTooLarge})
+
 def create_image(request, pk):
     badType = False
-    badFile = False
+    badSource = False
     fileTooLarge = False
     parentNotecard = get_object_or_404(Notecard, pk=pk)
 
@@ -616,8 +645,7 @@ def create_image(request, pk):
         path += parentNotecard.name[:20] + "..."
     else:
         path += parentNotecard.name
-    print('The path is ')
-    print(path)
+
     if(request.method == "POST"):
         form = ImageForm(request.POST)
         if form.is_valid():
@@ -625,16 +653,68 @@ def create_image(request, pk):
             image.author = request.user
             image.created_date = timezone.now()
             image.notecard = parentNotecard
-            #image.image = equation.equation.replace('<math', '<math display="block"')
-            image.save()
-            return redirect('notecard_detail', pk=pk)
+
+            # image is a file on computer
+            if os.path.isfile(image.source):
+                fileTooLarge = not is_valid_local_file_size(image.source)
+                if not fileTooLarge:
+                    with open(image.source, 'rb') as image_file:
+                        extension = os.path.splitext(image.source)[1]
+                        # Make sure file has correct extension
+                        if is_supported_image_extension(extension):
+                            image.image.save(image.name + time.strftime("%H%M%S") + extension, File(image_file), save=True)
+                            image.save()
+                            return redirect('notecard_detail', pk=pk)
+                        else:
+                            badType = True
+                else:
+                    print('Image file size is greater than 4GB')
+            # image is from internet or has a bad path
+            else:
+                try:
+                    #Check if URL is valid
+                    myRequest = requests.get(image.source)
+                    if myRequest.status_code == 200:
+                        #Check if extension is correct.
+                        extension = os.path.splitext(image.source)[1]
+                        if is_supported_image_extension(extension):
+                            #Check if file size < 4GB
+                            fileTooLarge = not is_valid_file_size(myRequest)
+                            if not fileTooLarge:
+                                #Download image from internet if file size is allowed.
+                                response = requests.get(image.source)
+                                downloadToPath = get_download_image_path(image.source + time.strftime("%H%M%S") + extension)
+                                #If directory does not exist, it is created.
+                                directory = os.path.dirname(downloadToPath)
+                                if not os.path.exists(directory):
+                                    os.makedirs(directory)
+                                with open(downloadToPath, 'wb') as image_file:
+                                    image_file.write(response.content)
+                                #Store location in db and save
+                                image_file.audio = downloadToPath
+                                image_file.save()
+                                return redirect('notecard_detail', pk=pk)
+                        else:
+                            badType = True
+                    else:
+                        badSource = True
+                except:
+                    badSource = True
     else:
         form = ImageForm()
-    return render(request, 'srs/create_image.html', {'form': form, 'pk':pk, 'path':path,'badFile': badFile, 'badType': badType, 'path':path, 'fileTooLarge':fileTooLarge})
+    return render(request, 'srs/create_image.html', {'form': form, 'pk':pk, 'path':path, "badType":badType, "badSource":badSource, "fileTooLarge":fileTooLarge})
+
+#Returns True if image extension is supported.
+#TODO: all the major image formats (JPEG, GIF, PNG, BMP, etc.)
+def is_supported_image_extension(extension):
+    return extension in (".jpg", ".gif", ".png", ".bmp")
+
+#Get the path where you want to download your image file to.
+def get_download_image_path(filename):
+    return os.getcwd()+'/srs/media/images/'+time.strftime("%Y/%m/%d")+'/'+filename
 
 def about(request):
     return render(request, 'srs/about.html')
-
 
 def contact(request):
     return render(request, 'srs/contact.html')
