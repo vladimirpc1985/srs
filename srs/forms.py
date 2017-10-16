@@ -1,5 +1,5 @@
 from django import forms
-from srs.models import Notefile, Notecard, Directory, Video, Audio, Document, Equation
+from srs.models import Notefile, Notecard, Directory, Video, Audio, Document, Equation, Image
 
 class ImportForm(forms.Form):
     path = forms.CharField(label='Path', max_length=100)
@@ -53,3 +53,8 @@ class EquationForm(forms.ModelForm):
     class Meta:
         model = Equation
         fields = ('equation',)
+
+class ImageForm(forms.ModelForm):
+    class Meta:
+        model = Image
+        fields = ('source', 'name',)

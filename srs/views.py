@@ -2,8 +2,8 @@ import json
 import os
 import os.path
 import re
-import time
 import subprocess
+import time
 
 import requests
 from django.contrib import messages
@@ -17,9 +17,8 @@ from pytube import YouTube
 from PIL import Image
 
 from srs.forms import NotefileForm, DirectoryForm, ImportForm, VideoForm, AudioForm, DocumentForm, NotecardForm, \
-    EquationForm
-from srs.models import Directory, Notefile, Notecard, Video, Audio, Document, Equation
-
+    EquationForm, ImageForm
+from srs.models import Directory, Notefile, Notecard, Video, Audio, Document, Equation, Image
 
 def logout_view(request):
     logout(request)
@@ -84,6 +83,9 @@ def document_list(request):
     documents = Document.objects.filter(created_date__lte=timezone.now())
     return render(request, 'srs/document_view.html', {'documents': documents})
 
+def image_list(request):
+    images = Image.objects.filter(created_date__lte=timezone.now())
+    return render(request, 'srs/image_list.html', {'images': images})
 
 def create_directory(request, pk):
     duplicate = False
@@ -232,8 +234,9 @@ def notecard_detail(request, pk):
     videos = Video.objects.filter(notecard=notecard)
     audios = Audio.objects.filter(notecard=notecard)
     documents = Document.objects.filter(notecard=notecard)
-
-    return render(request, 'srs/notecard_detail.html', {'notecard': notecard, 'pk': notecard.notefile.pk, 'path': path, 'videos': videos, 'audios': audios, 'documents': documents, 'equations': equations})
+    images = Image.objects.filter(notecard=notecard)
+    return render(request, 'srs/notecard_detail.html', {'notecard': notecard, 'pk': notecard.notefile.pk, 'path': path, 'videos': videos, 'audios': audios, 'documents': documents, 'equations': equations, 'images': images})
+    #return render(request, 'srs/notecard_detail.html', {'notecard': notecard, 'pk': notecard.notefile.pk, 'path': path, 'videos': videos, 'audios': audios, 'documents': documents, 'equations': equations})
 
 
 def create_video(request, pk):
@@ -359,13 +362,14 @@ def youtube_url_validation(url):
 def get_thumbnail(source):
     video_input_path = source
     filename = 'thumbnail' + time.strftime("%H%M%S") + '.jpg'
-    img_output_path = os.getcwd()+'/srs/media/thumbnails/'+time.strftime("%Y/%m/%d")+'/'+filename
+    img_output_path = 'thumbnails/'+time.strftime("%Y/%m/%d")+'/'+filename
+    img_local_output_path = os.getcwd()+'/srs/media/' + img_output_path
     #If directory does not exist, it is created.
-    directory = os.path.dirname(img_output_path)
+    directory = os.path.dirname(img_local_output_path)
     if not os.path.exists(directory):
         os.makedirs(directory)
-    subprocess.call(['avconv', '-i', video_input_path, '-ss', '00:00:05.000', '-vframes', '1', img_output_path])
-    return 'thumbnails/'+time.strftime("%Y/%m/%d")+'/'+filename
+    subprocess.call(['avconv', '-i', video_input_path, '-ss', '00:00:00.000', '-vframes', '1', img_local_output_path])
+    return img_output_path
 
 #Get the path where you want to download your video to.
 def get_download_path(filename):
@@ -373,7 +377,7 @@ def get_download_path(filename):
 
 #Returns True if video extension is supported.
 def is_supported_video_extension(extension):
-    return extension in ('.264', '.3g2', '.3gp', '.3gp2', '.3gpp', '.3gpp2', '.3mm', '.3p2', '.60d', '.787', '.89', '.aaf', '.aec', '.aep', '.aepx',
+    return extension.lower() in ('.264', '.3g2', '.3gp', '.3gp2', '.3gpp', '.3gpp2', '.3mm', '.3p2', '.60d', '.787', '.89', '.aaf', '.aec', '.aep', '.aepx',
                          '.aet', '.aetx', '.ajp', '.ale', '.am', '.amc', '.amv', '.amx', '.anim', '.aqt', '.arcut', '.arf', '.asf', '.asx', '.avb',
                          '.avc', '.avd', '.avi', '.avp', '.avs', '.avs', '.avv', '.axm', '.bdm', '.bdmv', '.bdt2', '.bdt3', '.bik', '.bin', '.bix',
                          '.bmk', '.bnp', '.box', '.bs4', '.bsf', '.bvr', '.byu', '.camproj', '.camrec', '.camv', '.ced', '.cel', '.cine', '.cip',
@@ -476,7 +480,7 @@ def create_audio(request, pk):
 
 #Returns True if audio extension is supported.
 def is_supported_audio_extension(extension):
-    return extension in ('.3gp', '.aa', '.aac', '.aax', '.act', '.aiff', '.amr', '.ape', '.au', '.awb', '.dct', '.dss', '.dvf', '.flac',
+    return extension.lower() in ('.3gp', '.aa', '.aac', '.aax', '.act', '.aiff', '.amr', '.ape', '.au', '.awb', '.dct', '.dss', '.dvf', '.flac',
                          '.gsm', '.iklax', '.ivs', '.m4a', '.m4b', '.m4p', '.mmf', '.mp3', '.mpc', '.msv', '.ogg, .oga, mogg', '.opus',
                          '.ra, .rm', '.raw', '.sln', '.tta', '.vox', '.wav', '.wma', '.wv', '.webm', '.8svx')
 
@@ -563,7 +567,7 @@ def create_document(request, pk):
 
 #Returns True if document extension is supported.
 def is_supported_document_extension(extension):
-    return extension in (".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx", ".pps", ".ppsx")
+    return extension.lower() in (".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx", ".pps", ".ppsx")
 
 #Get the path where you want to download your document to.
 def get_download_document_path(filename):
@@ -596,10 +600,88 @@ def create_equation(request, pk):
         form = EquationForm()
     return render(request, 'srs/create_equation.html', {'form': form, 'pk':pk, 'path':path})
 
+def create_image(request, pk):
+    badType = False
+    badSource = False
+    fileTooLarge = False
+    parentNotecard = get_object_or_404(Notecard, pk=pk)
+
+    # calculate path
+    notefile_Name = parentNotecard.notefile
+    path = getPath(request, notefile_Name.directory) + notefile_Name.name + "/"
+    if len(parentNotecard.name) > 20:
+        path += parentNotecard.name[:20] + "..."
+    else:
+        path += parentNotecard.name
+
+    if(request.method == "POST"):
+        form = ImageForm(request.POST)
+        if form.is_valid():
+            image = form.save(commit=False)
+            image.author = request.user
+            image.created_date = timezone.now()
+            image.notecard = parentNotecard
+
+            # image is a file on computer
+            if os.path.isfile(image.source):
+                fileTooLarge = not is_valid_local_file_size(image.source)
+                if not fileTooLarge:
+                    with open(image.source, 'rb') as image_file:
+                        extension = os.path.splitext(image.source)[1]
+                        # Make sure file has correct extension
+                        if is_supported_image_extension(extension):
+                            image.image.save(image.name + time.strftime("%H%M%S") + extension, File(image_file), save=True)
+                            image.save()
+                            return redirect('notecard_detail', pk=pk)
+                        else:
+                            badType = True
+                else:
+                    print('Image file size is greater than 4GB')
+            # image is from internet or has a bad path
+            else:
+                try:
+                    #Check if URL is valid
+                    myRequest = requests.get(image.source)
+                    if myRequest.status_code == 200:
+                        #Check if extension is correct.
+                        extension = os.path.splitext(image.source)[1]
+                        if is_supported_image_extension(extension):
+                            #Check if file size < 4GB
+                            fileTooLarge = not is_valid_file_size(myRequest)
+                            if not fileTooLarge:
+                                #Download image from internet if file size is allowed.
+                                response = requests.get(image.source)
+                                filename = image.name + time.strftime("%H%M%S") + extension
+                                img_output_path = 'images/'+time.strftime("%Y/%m/%d")+'/'+filename
+                                downloadToPath = os.getcwd()+'/srs/media/' + img_output_path
+                                #If directory does not exist, it is created.
+                                directory = os.path.dirname(downloadToPath)
+                                if not os.path.exists(directory):
+                                    os.makedirs(directory)
+                                with open(downloadToPath, 'wb') as image_file:
+                                    image_file.write(response.content)
+                                #Store location in db and save
+                                image.image = img_output_path
+                                image.save()
+                                return redirect('notecard_detail', pk=pk)
+                        else:
+                            badType = True
+                    else:
+                        badSource = True
+                except:
+                    print('An error occurred while trying to save the image.')
+                    badSource = True
+    else:
+        form = ImageForm()
+    return render(request, 'srs/create_image.html', {'form': form, 'pk':pk, 'path':path, "badType":badType, "badSource":badSource, "fileTooLarge":fileTooLarge})
+
+#Returns True if image extension is supported.
+def is_supported_image_extension(extension):
+    return extension.lower() in (".ani", ".bmp", ".cal", ".fax", ".gif", ".img", ".jbg", ".jpe", ".jpeg", ".jpg", ".mac",
+                                 ".pbm", ".pcd", ".pcx", ".pct", ".pgm", ".png", ".ppm", ".psd", ".ras", ".tga", ".tiff", ".wmf")
 
 def about(request):
     return render(request, 'srs/about.html')
-
 
 def contact(request):
     return render(request, 'srs/contact.html')

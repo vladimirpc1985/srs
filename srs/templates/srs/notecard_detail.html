@@ -4,6 +4,7 @@
 {% block site_content %}
     <a href="{% url 'selection_view' %}"><h2>Return to View Select</h2></a>
     <a href="{% url 'create_equation' pk=notecard.pk %}" class="top-menu"><h2>Add Equation</h2></a>
+    <a href="{% url 'create_image' pk=notecard.pk %}" class="top-menu"><h2>Add Image &nbsp;&nbsp;<i class="fa fa-file-image-o"></i></h2></a>
     <a href="{% url 'create_video' pk=notecard.pk %}" class="top-menu"><h2>Add Video &nbsp;&nbsp;<i class="fa fa-video-camera"></i></h2></a>
     <a href="{% url 'create_audio' pk=notecard.pk %}" class="top-menu"><h2>Add Audio &nbsp;&nbsp;<i class="fa fa-music"></i></h2></a>
     <a href="{% url 'create_document' pk=notecard.pk %}" class="top-menu"><h2>Add Document &nbsp;&nbsp;<i class="fa fa-file"></i></h2></a>
@@ -23,6 +24,16 @@
           <h2>Equations:</h2>
           {% for equation in equations %}
               <p class="equation-container">{% autoescape off %}{{equation.equation}}{% endautoescape %}</p>
+          {% endfor %}
+        {% endif %}
+
+        {% if images %}
+          <h2>Images:</h2>
+          {% for image in images %}
+            <div class="video_container">
+                <p class="vid_info">{{image.name}}</p>
+                <a data-path="/media/{{image.image}}" title="{{image.name}}" data-source="{{image.source}}" class="image-trigger"><img src="/media/{{image.image}}" width="190px" height="140px"></a>
+            </div>
           {% endfor %}
         {% endif %}
 
@@ -55,6 +66,17 @@
               </p>
           {% endfor %}
         {% endif %}
+
+        <!-- Image Modal -->
+        <div id="imagemodal" class="image-modal">
+          <span class="image-close">&times;</span>
+
+          <!-- Modal content-->
+          <img class="image-modal-content" id="modal-image">
+
+          <strong><div id="image-caption"></div></strong>
+          <strong><div id="image-source"></div></strong>
+        </div>
 
         <!-- Video Modal -->
         <div id="vidmodal" class="modal video-modal" role="dialog">
@@ -104,9 +126,11 @@
         </div>
 
         <div class="backdrop"></div>
+
     </div>
 
     {% load static %}
+    <script type="text/javascript" src="{% static 'js/loadImage.js' %}"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/wavesurfer.js/1.4.0/wavesurfer.min.js"></script>
     <script type="text/javascript" src="{% static 'js/loadAudio.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/loadVideo.js' %}"></script>
