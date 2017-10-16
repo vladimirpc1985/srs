@@ -362,19 +362,14 @@ def youtube_url_validation(url):
 def get_thumbnail(source):
     video_input_path = source
     filename = 'thumbnail' + time.strftime("%H%M%S") + '.jpg'
-    img_output_path = os.getcwd()+'/srs/media/thumbnails/'+time.strftime("%Y/%m/%d")+'/'+filename
+    img_output_path = 'thumbnails/'+time.strftime("%Y/%m/%d")+'/'+filename
+    img_local_output_path = os.getcwd()+'/srs/media/' + img_output_path
     #If directory does not exist, it is created.
-    directory = os.path.dirname(img_output_path)
+    directory = os.path.dirname(img_local_output_path)
     if not os.path.exists(directory):
         os.makedirs(directory)
-    #TODO: Get duration of the video, divide by 2 and get the corresponding frame.
-    #command = "avconv -i " + video_input_path + "2>&1 | grep Duration | cut -d ' ' -f 4 | sed -e 's/.\{4\}$//'"
-    #task = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
-    #time = task.communicate()[0]
-    #print('This video lasts ')
-    #print(time)
-    subprocess.call(['avconv', '-i', video_input_path, '-ss', '00:00:00.000', '-vframes', '1', img_output_path])
-    return 'thumbnails/'+time.strftime("%Y/%m/%d")+'/'+filename
+    subprocess.call(['avconv', '-i', video_input_path, '-ss', '00:00:00.000', '-vframes', '1', img_local_output_path])
+    return img_output_path
 
 #Get the path where you want to download your video to.
 def get_download_path(filename):
@@ -656,7 +651,9 @@ def create_image(request, pk):
                             if not fileTooLarge:
                                 #Download image from internet if file size is allowed.
                                 response = requests.get(image.source)
-                                downloadToPath = get_download_image_path(image.name + time.strftime("%H%M%S") + extension)
+                                filename = image.name + time.strftime("%H%M%S") + extension
+                                img_output_path = 'images/'+time.strftime("%Y/%m/%d")+'/'+filename
+                                downloadToPath = os.getcwd()+'/srs/media/' + img_output_path
                                 #If directory does not exist, it is created.
                                 directory = os.path.dirname(downloadToPath)
                                 if not os.path.exists(directory):
@@ -664,7 +661,7 @@ def create_image(request, pk):
                                 with open(downloadToPath, 'wb') as image_file:
                                     image_file.write(response.content)
                                 #Store location in db and save
-                                image.image = downloadToPath
+                                image.image = img_output_path
                                 image.save()
                                 return redirect('notecard_detail', pk=pk)
                         else:
@@ -679,14 +676,9 @@ def create_image(request, pk):
     return render(request, 'srs/create_image.html', {'form': form, 'pk':pk, 'path':path, "badType":badType, "badSource":badSource, "fileTooLarge":fileTooLarge})
 
 #Returns True if image extension is supported.
-#TODO: all the major image formats (JPEG, GIF, PNG, BMP, etc.)
 def is_supported_image_extension(extension):
     return extension.lower() in (".ani", ".bmp", ".cal", ".fax", ".gif", ".img", ".jbg", ".jpe", ".jpeg", ".jpg", ".mac",
                                  ".pbm", ".pcd", ".pcx", ".pct", ".pgm", ".png", ".ppm", ".psd", ".ras", ".tga", ".tiff", ".wmf")
-
-#Get the path where you want to download your image file to.
-def get_download_image_path(filename):
-    return os.getcwd()+'/srs/media/images/'+time.strftime("%Y/%m/%d")+'/'+filename
 
 def about(request):
     return render(request, 'srs/about.html')
