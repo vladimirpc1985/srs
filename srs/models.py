@@ -58,6 +58,7 @@ class Notecard(models.Model):
     created_date = models.DateTimeField(
             default=timezone.now)
     notefile = models.ForeignKey(Notefile, on_delete=models.CASCADE)
+    hiddenField = models.TextField(blank=True, null=True)
 
     def create(self):
         self.created_date = timezone.now()

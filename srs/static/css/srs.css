@@ -735,6 +735,15 @@ ul img {
   background-color: #2e75bf;
 }
 
+.btn.insert-link {
+  color: white;
+  background-color: #f5b71b;
+}
+
+.btn.insert-link:hover {
+  background-color: #daa216;
+}
+
 input {
   padding: 3px;
   width: 300px;
@@ -830,6 +839,13 @@ input {
   margin-left: -375px;
 }
 
+.link-modal {
+  min-height: 250px;
+  width: 500px;
+  margin-top: -140px;
+  margin-left: -250px;
+}
+
 .backdrop {
   position: fixed;
   z-index: 100;
@@ -880,6 +896,12 @@ input {
   display: inline-block;
   font-size: 25px;
   padding-left: 190px;
+}
+
+.link-modal-title{
+  display: inline-block;
+  font-size: 25px;
+  padding-left: 82px;
 }
 
 .insert-btn {
@@ -974,6 +996,11 @@ input {
   display: none;
 }
 
+.form-control{
+  width: 95%;
+  height: 20px;
+}
+
 .mjx-chtml{
   margin-top: 0px !important;
   margin-bottom: 0px !important;
@@ -1051,4 +1078,46 @@ input {
     color: #bbb;
     text-decoration: none;
     cursor: pointer;
+}
+
+.blue-links a{
+  color: #0c83d9;
+}
+
+.blue-links a:hover{
+  color: #2694e4;
+}
+
+.space-fix{
+  display: inline-block;
+  margin-top: 10px !important;
+  margin-bottom: 30px !important;
+}
+
+.space-fix2{
+  display: inline-block;
+  margin-top: 15px !important;
+  margin-bottom: 5px !important;
+}
+
+input[type='checkbox']{
+  height: 15px;
+  width: 15px;
+  margin-right: 10px;
+}
+
+.inline-block{
+  display: inline-block;
+}
+
+.full-width{
+  width: 100%;
+}
+
+.top-margin{
+  margin-top: 20px;
+}
+
+.equation-left .MJXc-display{
+  display: inline-block !important;
 }

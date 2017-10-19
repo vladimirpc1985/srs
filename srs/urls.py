@@ -22,6 +22,7 @@ urlpatterns = [
 	url(r'^srs/create_directory/(?P<pk>\d+)/$', views.create_directory, name='create_directory'),
 	url(r'^srs/directory_list/(?P<pk>\d+)/$', views.directory_content, name='directory_content'),
 	url(r'^srs/create_notecard/(?P<pk>\d+)/$', views.create_notecard, name='create_notecard'),
+    url(r'^srs/duplicate_notecard/(?P<pk>\d+)/$', views.duplicate_notecard, name='duplicate_notecard'),
 	url(r'^srs/create_video/(?P<pk>\d+)/$', views.create_video, name='create_video'),
 	url(r'^srs/create_audio/(?P<pk>\d+)/$', views.create_audio, name='create_audio'),
 	url(r'^srs/create_document/(?P<pk>\d+)/$', views.create_document, name='create_document'),

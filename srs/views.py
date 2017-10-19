@@ -17,7 +17,7 @@ from pytube import YouTube
 from PIL import Image
 
 from srs.forms import NotefileForm, DirectoryForm, ImportForm, VideoForm, AudioForm, DocumentForm, NotecardForm, \
-    EquationForm, ImageForm
+    EquationForm, ImageForm, DuplicateNotecardForm
 from srs.models import Directory, Notefile, Notecard, Video, Audio, Document, Equation, Image
 
 def logout_view(request):
@@ -134,6 +134,71 @@ def create_notecard(request, pk):
     else:
         form = NotecardForm()
     return render(request, 'srs/create_notecard.html', {'form': form, 'path': path, "pk": pk})
+
+
+def duplicate_notecard(request, pk):
+    if request.method == "POST":
+        form = DuplicateNotecardForm(request.POST)
+        if form.is_valid():
+            notecard = form.save(commit=False)
+            notecard.notefile = get_object_or_404(Notefile, pk=3)
+
+            # Get hidden JSON input from author field
+            jsonRes = form.cleaned_data.get('hiddenField')
+            notecard.hiddenField = None
+
+            # Save duplicate notecard
+            notecard.author = request.user
+            notecard.created_date = timezone.now()
+            notecard.save()
+
+            # Create duplicates of all objects that were selected (inside jsonRes)
+            jsonRes = json.loads(jsonRes)
+            print(jsonRes)
+            print(jsonRes['videos'])
+            if jsonRes['videos']:
+                for i in jsonRes['videos']:
+                    newVid = get_object_or_404(Video, pk=i)
+                    newVid.notecard = notecard
+                    newVid.pk = None
+                    newVid.save()
+            if jsonRes['images']:
+                for i in jsonRes['images']:
+                    newImg = get_object_or_404(Image, pk=i)
+                    newImg.notecard = notecard
+                    newImg.pk = None
+                    newImg.save()
+            if jsonRes['audios']:
+                for i in jsonRes['audios']:
+                    newAud = get_object_or_404(Audio, pk=i)
+                    newAud.notecard = notecard
+                    newAud.pk = None
+                    newAud.save()
+            if jsonRes['equations']:
+                for i in jsonRes['equations']:
+                    newEq = get_object_or_404(Equation, pk=i)
+                    newEq.notecard = notecard
+                    newEq.pk = None
+                    newEq.save()
+            if jsonRes['documents']:
+                for i in jsonRes['documents']:
+                    newDoc = get_object_or_404(Document, pk=i)
+                    newDoc.notecard = notecard
+                    newDoc.pk = None
+                    newDoc.save()
+
+            return redirect('notecard_detail', pk=notecard.pk)
+    else:
+        oldNotecard = get_object_or_404(Notecard, pk=pk)
+        data = {'name': oldNotecard.name, 'keywords': oldNotecard.keywords, 'label': oldNotecard.label, 'body': oldNotecard.body, 'notefile': oldNotecard.notefile}
+        form = DuplicateNotecardForm(initial=data)
+        # Get the list of objects associated with this notecard.
+        equations = Equation.objects.filter(notecard=oldNotecard)
+        videos = Video.objects.filter(notecard=oldNotecard)
+        audios = Audio.objects.filter(notecard=oldNotecard)
+        documents = Document.objects.filter(notecard=oldNotecard)
+        images = Image.objects.filter(notecard=oldNotecard)
+    return render(request, 'srs/duplicate_notecard.html', {'form': form, "pk": pk, 'videos': videos, 'audios': audios, 'documents': documents, 'equations': equations, 'images': images})
 
 
 def login(request):

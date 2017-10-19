@@ -8,6 +8,7 @@
 	      <button type="submit" class="save btn btn-default">Save</button>
 	      <a href="{% url 'notecard_list' pk=pk %}" class="cancel btn btn-default">Cancel</a>
 				<a id="open-btn" class="insert btn btn-default">Insert Equation</a>
+				<a id="open-btn2" class="insert-link btn btn-default">Insert Link</a>
 	  </form>
 
 		<!-- Equation Modal -->
@@ -31,9 +32,35 @@
         </div>
     </div>
 
+		<!-- Link Modal -->
+		<div id="linkmodal" class="modal link-modal" role="dialog">
+				<div class="modal-dialog">
+
+						<!-- Modal content-->
+						<div class="modal-content">
+								<div class="modal-header">
+										<button id="close-btn2" class="close_btn btn">Close</button>
+										<h2 class="link-modal-title">Insert Link</h2>
+								</div>
+								<div class="modal-body">
+										<p>Display Text</p>
+										<input id="display" type="text" class="form-control">
+										<p class="top-pad">Link URL</p>
+										<input id="url" type="text" class="form-control">
+										<p id="err" class="error text-center hidden">You must fill out both fields!</p>
+										<div class="text-center top-pad">
+											<button id="insert-btn2" class="btn insert-link">Insert</button>
+										</div>
+								</div>
+						</div>
+
+				</div>
+		</div>
+
 		<div class="backdrop"></div>
 
 		<script src = "http://www.wiris.net/demo/editor/editor"></script>
 		<script src="{% static 'js/insertEquation.js' %}"></script>
+		<script src="{% static 'js/insertLink.js' %}"></script>
 
 {% endblock %}

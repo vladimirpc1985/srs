@@ -19,6 +19,18 @@ class NotecardForm(forms.ModelForm):
         model = Notecard
         fields = ('name', 'keywords', 'label', 'body',)
 
+class DuplicateNotecardForm(forms.ModelForm):
+
+    keywords = forms.CharField(required=False, widget=forms.Textarea, strip= False)
+    label = forms.CharField(required=False, widget=forms.Textarea, strip = False)
+    body = forms.CharField(required=False, widget=forms.Textarea, strip = False)
+    hiddenField = forms.CharField(required=False, strip = False, widget = forms.HiddenInput())
+    notefile = forms.ModelChoiceField(queryset=Notefile.objects.all(), required=True)
+
+    class Meta:
+        model = Notecard
+        fields = ('name', 'notefile', 'keywords', 'label', 'body', 'hiddenField')
+
 class DirectoryForm(forms.ModelForm):
     class Meta:
         model = Directory
