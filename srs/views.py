@@ -15,6 +15,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
 from pytube import YouTube
 from PIL import Image
+from django.contrib.auth.decorators import login_required
 
 from srs.forms import NotefileForm, DirectoryForm, ImportForm, VideoForm, AudioForm, DocumentForm, NotecardForm, \
     EquationForm, ImageForm, DuplicateNotecardForm
@@ -24,14 +25,23 @@ def logout_view(request):
     logout(request)
     return redirect('welcome')
 
-
 def welcome_text(request):
     return render(request, 'srs/welcome.html', {})
-
 
 def welcome_srs(request):
     return render(request, 'srs/welcome_srs.html', {})
 
+def about(request):
+    return render(request, 'srs/about.html')
+
+def contact(request):
+    return render(request, 'srs/contact.html')
+
+def login(request):
+    return render(request, 'srs/login.html')
+
+def create_account(request):
+    return render(request, 'srs/create_account.html')
 
 def getPath(request, current_directory):
     home_directory = Directory.objects.filter(author=request.user).get(parent_directory__isnull = True)
@@ -43,7 +53,7 @@ def getPath(request, current_directory):
     path = "/" + path
     return path
 
-
+@login_required
 def home_directory(request):
     # get notefiles and directories that lie in the home directory
     home_directory = Directory.objects.filter(author=request.user).get(parent_directory__isnull = True)
@@ -52,7 +62,7 @@ def home_directory(request):
     # Edit sos dynamic
     return render(request, 'srs/directory_view.html', {'notefiles': notefiles, 'directories': directories, 'path': '/', 'pk': home_directory.pk})
 
-
+@login_required
 def directory_content(request, pk):
     home_directory = Directory.objects.filter(author=request.user).get(parent_directory__isnull = True)
     current_directory = Directory.objects.get(pk=pk)
@@ -64,33 +74,35 @@ def directory_content(request, pk):
 
     return render(request, 'srs/directory_view.html', {'notefiles': notefiles, 'directories': directories, 'parent': current_directory.parent_directory, 'path': path, 'pk': pk})
 
-
+@login_required
 def selection_view(request):
     return render(request, 'srs/selection_view.html', {})
 
-
+@login_required
 def video_list(request):
-    videos = Video.objects.filter(created_date__lte=timezone.now())
+    videos = Video.objects.filter(author=request.user).filter(created_date__lte=timezone.now())
     return render(request, 'srs/video_view.html', {'videos': videos})
 
-
+@login_required
 def audio_list(request):
-    audios = Audio.objects.filter(created_date__lte=timezone.now())
+    audios = Audio.objects.filter(author=request.user).filter(created_date__lte=timezone.now())
     return render(request, 'srs/audio_view.html', {'audios': audios})
 
-
+@login_required
 def document_list(request):
-    documents = Document.objects.filter(created_date__lte=timezone.now())
+    documents = Document.objects.filter(author=request.user).filter(created_date__lte=timezone.now())
     return render(request, 'srs/document_view.html', {'documents': documents})
 
+@login_required
 def image_list(request):
-    images = Image.objects.filter(created_date__lte=timezone.now())
+    images = Image.objects.filter(author=request.user).filter(created_date__lte=timezone.now())
     return render(request, 'srs/image_list.html', {'images': images})
 
+@login_required
 def create_directory(request, pk):
     duplicate = False
     parent = get_object_or_404(Directory, pk=pk)
-    home_directory = Directory.objects.filter(author=request.user).get(parent_directory__isnull = True)
+    home_directory = Directory.objects.get(parent_directory__isnull = True)
 
     # calculate path
     path = getPath(request, parent)
@@ -98,7 +110,7 @@ def create_directory(request, pk):
     if request.method == "POST":
         form = DirectoryForm(request.POST)
         if form.is_valid():
-            if Directory.objects.filter(parent_directory=parent).filter(name=form.cleaned_data.get('name')).exists():
+            if Directory.objects.filter(author=request.user).filter(parent_directory=parent).filter(name=form.cleaned_data.get('name')).exists():
                 duplicate = True;
             else:
                 directory = form.save(commit=False)
@@ -114,7 +126,7 @@ def create_directory(request, pk):
         form = DirectoryForm()
     return render(request, 'srs/create_directory.html', {'form': form, 'parent': parent, 'duplicate': duplicate, 'path': path})
 
-
+@login_required
 def create_notecard(request, pk):
     parentNotefile = get_object_or_404(Notefile, pk=pk)
     home_directory = Directory.objects.filter(author=request.user).get(parent_directory__isnull = True)
@@ -135,7 +147,7 @@ def create_notecard(request, pk):
         form = NotecardForm()
     return render(request, 'srs/create_notecard.html', {'form': form, 'path': path, "pk": pk})
 
-
+@login_required
 def duplicate_notecard(request, pk):
     if request.method == "POST":
         form = DuplicateNotecardForm(request.POST)
@@ -193,27 +205,19 @@ def duplicate_notecard(request, pk):
         data = {'name': oldNotecard.name, 'keywords': oldNotecard.keywords, 'label': oldNotecard.label, 'body': oldNotecard.body, 'notefile': oldNotecard.notefile}
         form = DuplicateNotecardForm(initial=data)
         # Get the list of objects associated with this notecard.
-        equations = Equation.objects.filter(notecard=oldNotecard)
-        videos = Video.objects.filter(notecard=oldNotecard)
-        audios = Audio.objects.filter(notecard=oldNotecard)
-        documents = Document.objects.filter(notecard=oldNotecard)
-        images = Image.objects.filter(notecard=oldNotecard)
+        equations = Equation.objects.filter(author=request.user).filter(notecard=oldNotecard)
+        videos = Video.objects.filter(author=request.user).filter(notecard=oldNotecard)
+        audios = Audio.objects.filter(author=request.user).filter(notecard=oldNotecard)
+        documents = Document.objects.filter(author=request.user).filter(notecard=oldNotecard)
+        images = Image.objects.filter(author=request.user).filter(notecard=oldNotecard)
     return render(request, 'srs/duplicate_notecard.html', {'form': form, "pk": pk, 'videos': videos, 'audios': audios, 'documents': documents, 'equations': equations, 'images': images})
 
-
-def login(request):
-    return render(request, 'srs/login.html')
-
-
-def create_account(request):
-    return render(request, 'srs/create_account.html')
-
-
+@login_required
 def notefile_list(request):
-    notefiles = Notefile.objects.filter(created_date__lte=timezone.now())
+    notefiles = Notefile.objects.filter(author=request.user).filter(created_date__lte=timezone.now())
     return render(request, 'srs/notefile_list.html', {'notefiles': notefiles})
 
-
+@login_required
 def notefile_detail(request, pk):
     notefile = get_object_or_404(Notefile, pk=pk)
 
@@ -222,7 +226,7 @@ def notefile_detail(request, pk):
 
     return render(request, 'srs/notefile_detail.html', {'notefile': notefile, 'path': path})
 
-
+@login_required
 def notefile_new(request, pk):
     duplicate = False
     parent = get_object_or_404(Directory, pk=pk)
@@ -239,7 +243,7 @@ def notefile_new(request, pk):
     if request.method == "POST":
         form = NotefileForm(request.POST)
         if form.is_valid():
-            if Notefile.objects.filter(directory=parent).filter(name=form.cleaned_data.get('name')).exists():
+            if Notefile.objects.filter(author=request.user).filter(directory=parent).filter(name=form.cleaned_data.get('name')).exists():
                 duplicate = True;
             else:
                 notefile = form.save(commit=False)
@@ -255,19 +259,14 @@ def notefile_new(request, pk):
         form = NotefileForm()
     return render(request, 'srs/create_notefile.html', {'form': form, 'parent_is_home': parent_is_home, 'pk': pk, 'duplicate': duplicate, 'path': path})
 
-
-#TODO figure out where this is used and maybe replace name?
-def get_notefile(request):
-    return request.GET.get('name')
-
-
+@login_required
 def notecard_list(request, pk):
-    notefile_Name = Notefile.objects.get(pk=pk)
+    notefile_Name = Notefile.objects.filter(author=request.user).get(pk=pk)
 
     # calculate path
     path = getPath(request, notefile_Name.directory) + notefile_Name.name + "/"
 
-    notecards = Notecard.objects.filter(notefile=notefile_Name)
+    notecards = Notecard.objects.filter(author=request.user).filter(notefile=notefile_Name)
     queryset = serializers.serialize('json', notecards)
     queryset = json.dumps(queryset)
     notecards_count = notecards.count()
@@ -282,7 +281,7 @@ def notecard_list(request, pk):
         auto_list = [x for x in auto_list if x != ""]
         return render(request, 'srs/notecard_list.html', {'notecards': notecards, 'startIndex': index, 'queryset': queryset, 'auto_list': auto_list, 'pk': pk, 'path': path})
 
-
+@login_required
 def notecard_detail(request, pk):
     notecard = get_object_or_404(Notecard, pk=pk)
 
@@ -295,15 +294,15 @@ def notecard_detail(request, pk):
         path += notecard.name
 
     # Get the list of objects associated with this notecard.
-    equations = Equation.objects.filter(notecard=notecard)
-    videos = Video.objects.filter(notecard=notecard)
-    audios = Audio.objects.filter(notecard=notecard)
-    documents = Document.objects.filter(notecard=notecard)
-    images = Image.objects.filter(notecard=notecard)
+    equations = Equation.objects.filter(author=request.user).filter(notecard=notecard)
+    videos = Video.objects.filter(author=request.user).filter(notecard=notecard)
+    audios = Audio.objects.filter(author=request.user).filter(notecard=notecard)
+    documents = Document.objects.filter(author=request.user).filter(notecard=notecard)
+    images = Image.objects.filter(author=request.user).filter(notecard=notecard)
     return render(request, 'srs/notecard_detail.html', {'notecard': notecard, 'pk': notecard.notefile.pk, 'path': path, 'videos': videos, 'audios': audios, 'documents': documents, 'equations': equations, 'images': images})
     #return render(request, 'srs/notecard_detail.html', {'notecard': notecard, 'pk': notecard.notefile.pk, 'path': path, 'videos': videos, 'audios': audios, 'documents': documents, 'equations': equations})
 
-
+@login_required
 def create_video(request, pk):
     youtubeError = False
     badSource = False
@@ -471,6 +470,7 @@ def is_supported_video_extension(extension):
                          '.wpl', '.wtv', '.wve', '.wvx', '.xej', '.xel', '.xesc', '.xfl', '.xlmv', '.xmv', '.xvid', '.y4m', '.yog', '.yuv', '.zeg',
                          '.zm1', '.zm2', '.zm3', '.zmv')
 
+@login_required
 def create_audio(request, pk):
     badType = False
     badSource = False
@@ -559,6 +559,7 @@ def is_valid_local_file_size(source):
     size = statinfo.st_size
     return int(size) <= 4000000000
 
+@login_required
 def create_document(request, pk):
     badType = False
     badFile = False
@@ -638,6 +639,7 @@ def is_supported_document_extension(extension):
 def get_download_document_path(filename):
     return os.getcwd()+'/srs/media/documents/'+time.strftime("%Y/%m/%d")+'/'+filename
 
+@login_required
 def create_equation(request, pk):
     parentNotecard = get_object_or_404(Notecard, pk=pk)
 
@@ -665,6 +667,7 @@ def create_equation(request, pk):
         form = EquationForm()
     return render(request, 'srs/create_equation.html', {'form': form, 'pk':pk, 'path':path})
 
+@login_required
 def create_image(request, pk):
     badType = False
     badSource = False
@@ -745,15 +748,10 @@ def is_supported_image_extension(extension):
     return extension.lower() in (".ani", ".bmp", ".cal", ".fax", ".gif", ".img", ".jbg", ".jpe", ".jpeg", ".jpg", ".mac",
                                  ".pbm", ".pcd", ".pcx", ".pct", ".pgm", ".png", ".ppm", ".psd", ".ras", ".tga", ".tiff", ".wmf")
 
-def about(request):
-    return render(request, 'srs/about.html')
-
-def contact(request):
-    return render(request, 'srs/contact.html')
-
+@login_required
 def import_notecard(request, pk):
     # calculate path
-    notefile_Name = Notefile.objects.get(pk=pk)
+    notefile_Name = Notefile.objects.filter(author=request.user).get(pk=pk)
     path = getPath(request, notefile_Name.directory) + notefile_Name.name + "/"
 
     if request.method == 'POST':
@@ -763,7 +761,7 @@ def import_notecard(request, pk):
             cd = form.cleaned_data
             path = cd.get('path')
             #To check if a notecard was created.
-            notecards = Notecard.objects.filter(notefile=notefile_Name)
+            notecards = Notecard.objects.filter(author=request.user).filter(notefile=notefile_Name)
             notecards_count_before = notecards.count()
             try:
                 readFile(request, path, pk)
@@ -779,7 +777,7 @@ def import_notecard(request, pk):
 
     return render(request, 'srs/import_notecard.html', {'form': form, 'pk':pk, 'path': path})
 
-
+@login_required
 def readFile(request, path, notefilePK):
     # open binary file in read-only mode
     fileHandler = openFile(path, 'rb')
@@ -789,7 +787,6 @@ def readFile(request, path, notefilePK):
         readContent(request, file, notefilePK)
         file.close()
 
-
 def openFile(path, mode):
     # open file using python's open method
     # by default file gets opened in read mode
@@ -798,7 +795,6 @@ def openFile(path, mode):
         return {'opened':True, 'handler':fileHandler}
     except:
         return {'opened':False, 'handler':None}
-
 
 def readContent(request, file, notefilePK):
     # we have at least empty file now
@@ -811,7 +807,6 @@ def readContent(request, file, notefilePK):
         lines.append(line)
     #check if file is correct and create notecard if it's correct.
     checkFileFormat(request, lines, notefilePK)
-
 
 def checkFileFormat(request, lines, notefilePK):
     #Check whether the length of the file is greater than 5 (at least 5 delimiters)
@@ -864,13 +859,14 @@ def checkFileFormat(request, lines, notefilePK):
     except ValueError as err:
         print(err.args)
 
+@login_required
 def init_notecard(request, keywords, header, body, notefilePK):
     str_keywords = keywords.decode('ascii', 'ignore')
     str_header = header.decode('ascii', 'ignore')
     str_body = body.decode('ascii', 'ignore')
     if str_keywords != '' or str_header != '' or str_body != '':
         try:
-            notefile_name = Notefile.objects.get(pk=notefilePK)
+            notefile_name = Notefile.objects.filter(author=request.user).get(pk=notefilePK)
             if request.user.is_authenticated():
                 user = User.objects.get(username=request.user.username)
                 Notecard.objects.create(author=user,name=str_header, keywords=str_keywords, body = str_body, notefile = notefile_name)
@@ -879,10 +875,10 @@ def init_notecard(request, keywords, header, body, notefilePK):
         except ValueError as err:
             print(err.args)
 
-
+@login_required
 def export_notecard(request, pk):
     # calculate path
-    notefile_Name = Notefile.objects.get(pk=pk)
+    notefile_Name = Notefile.objects.filter(author=request.user).get(pk=pk)
     path = getPath(request, notefile_Name.directory) + notefile_Name.name + "/"
 
     if request.method == 'POST':
@@ -902,11 +898,10 @@ def export_notecard(request, pk):
 
     return render(request, 'srs/export_notecard.html', {'form': form, 'pk':pk, 'path': path})
 
-
 def create_file(pk, path):
     #Get notecard list associated to given notefile
-    notefile_Name = Notefile.objects.get(pk=pk)
-    notecards = Notecard.objects.filter(notefile=notefile_Name)
+    notefile_Name = Notefile.objects.filter(author=request.user).get(pk=pk)
+    notecards = Notecard.objects.filter(author=request.user).filter(notefile=notefile_Name)
     #Create file
     new_file = open(path,'wb')
     #Add required header for SQI file
