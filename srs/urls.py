@@ -28,7 +28,6 @@ urlpatterns = [
 	url(r'^srs/create_document/(?P<pk>\d+)/$', views.create_document, name='create_document'),
 	url(r'^srs/create_equation/(?P<pk>\d+)/$', views.create_equation, name='create_equation'),
 	url(r'^srs/create_image/(?P<pk>\d+)/$', views.create_image, name='create_image'),
-	url(r'^admin/', admin.site.urls, name='login_redirect'),
 	url(r'^logout/$', views.logout_view, name='logout'),
 	url(r'^srs/video_archive/$', views.video_list, name='video_list'),
 	url(r'^srs/audio_archive/$', views.audio_list, name='audio_list'),
