@@ -153,7 +153,6 @@ def duplicate_notecard(request, pk):
         form = DuplicateNotecardForm(request.POST)
         if form.is_valid():
             notecard = form.save(commit=False)
-            notecard.notefile = get_object_or_404(Notefile, pk=3)
 
             # Get hidden JSON input from author field
             jsonRes = form.cleaned_data.get('hiddenField')
